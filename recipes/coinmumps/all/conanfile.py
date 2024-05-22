@@ -40,10 +40,9 @@ class COINMUMPSRecipe(ConanFile):
             keep_permissions=True,
             strip_root=True
         )
-        mumps_version = self.conan_data["mumps-version"][self.version]
         get(
             self,
-            **self.conan_data["sources-mumps"][mumps_version],
+            **self.conan_data["mumps-sources"][self.version],
             destination=os.path.join(self.source_folder, "MUMPS"),
             strip_root=True
         )
