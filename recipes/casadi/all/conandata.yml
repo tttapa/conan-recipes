@@ -1,4 +1,10 @@
 sources:
+  "3.6.7":
+    url: "https://github.com/casadi/casadi/archive/refs/tags/3.6.7.zip"
+    sha256: "5cd726ad69c8c831880dc57bf5fa1a0822a33664f8ce45e9e5ca1b6219662540"
+  "3.6.6":
+    url: "https://github.com/casadi/casadi/archive/refs/tags/3.6.6.zip"
+    sha256: "2483dcf33fb50ef160caf8992b129627cfa3f8a6021afc6da9bcf18de6a7aedc"
   "3.6.5":
     url: "https://github.com/casadi/casadi/archive/refs/tags/3.6.5.zip"
     sha256: "50b7ab41007bfdc099150d6d301e65504bdd6eb16f1d65ad36a0eaa516b8f5ab"
