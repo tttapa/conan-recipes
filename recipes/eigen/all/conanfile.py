@@ -32,7 +32,7 @@ class EigenConan(ConanFile):
         self.license = "MPL-2.0" if self.options.MPL2_only else ("MPL-2.0", "LGPL-3.0-or-later")
 
     def layout(self):
-        cmake_layout(self, src_folder="src")
+        cmake_layout(self)
 
     def package_id(self):
         self.info.clear()
