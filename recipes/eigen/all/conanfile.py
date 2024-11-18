@@ -46,6 +46,8 @@ class EigenConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.cache_variables["BUILD_TESTING"] = not self.conf.get("tools.build:skip_test", default=True, check_type=bool)
         tc.cache_variables["EIGEN_TEST_NOQT"] = True
+        tc.cache_variables["EIGEN_BUILD_BLAS"] = False
+        tc.cache_variables["EIGEN_BUILD_LAPACK"] = False
         tc.generate()
 
     def build(self):
