@@ -48,7 +48,7 @@ class HpipmRecipe(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("blasfeo/0.1.4.1")
+        self.requires("blasfeo/0.1.4.1", transitive_headers=True)
 
     def generate(self):
         deps = CMakeDeps(self)
