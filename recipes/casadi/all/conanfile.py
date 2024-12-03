@@ -231,7 +231,7 @@ class CasADiRecipe(ConanFile):
         apply_conandata_patches(self)
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def generate(self):
         deps = CMakeDeps(self)

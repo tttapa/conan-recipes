@@ -69,7 +69,7 @@ class BlasfeoRecipe(ConanFile):
         apply_conandata_patches(self)
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         pass

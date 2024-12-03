@@ -51,7 +51,7 @@ class guanaqoRecipe(ConanFile):
         apply_conandata_patches(self)
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.test_requires("gtest/1.15.0")

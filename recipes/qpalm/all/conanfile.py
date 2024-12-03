@@ -62,7 +62,7 @@ class QPALMRecipe(ConanFile):
         apply_conandata_patches(self)
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("ladel/tttapa.20241118", transitive_headers=True)
