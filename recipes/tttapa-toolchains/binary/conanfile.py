@@ -37,8 +37,18 @@ class ToolchainsConan(ConanFile):
             destination=self.package_folder,
             strip_root=True
         )
+        os.system(f"chmod -R +w {self.package_folder}")
 
     def package_info(self):
         target = str(self.options.target)
         bindir = os.path.join(self.package_folder, target, "bin")
         self.buildenv_info.prepend_path("PATH", bindir)
+        libname = {
+            "x86_64-bionic-linux-gnu": "lib64",
+            "aarch64-rpi3-linux-gnu": "lib64",
+            "armv8-rpi3-linux-gnueabihf": "lib",
+            "armv7-neon-linux-gnueabihf": "lib",
+            "armv6-rpi-linux-gnueabihf": "lib",
+        }[target]
+        libdir = os.path.join(self.package_folder, target, target, libname)
+        self.runenv_info.prepend_path("LD_LIBRARY_PATH", libdir)
