@@ -28,18 +28,15 @@ class ToolchainsConan(ConanFile):
             msg = "Binaries are only provided for Linux on x86_64"
             raise ConanInvalidConfiguration(msg)
 
-    def build(self):
+    def package(self):
         os_name = str(self.settings.os)
         target = str(self.options.target)
         get(
             self,
             **self.conan_data["sources"][self.version][os_name][target],
-            destination=self.source_folder,
+            destination=self.package_folder,
             strip_root=True
         )
-
-    def package(self):
-        copy(self, "*", src=self.build_folder, dst=self.package_folder)
 
     def package_info(self):
         target = str(self.options.target)
