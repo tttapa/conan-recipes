@@ -16,12 +16,14 @@ from conan.tools.files import (
     save,
 )
 from conan.tools.scm import Version
+from conan.tools.build import cross_building
 
 
 class CustomAutotoolsToolchain(AutotoolsToolchain):
     def environment(self):
         env = super().environment()
-        env.define_path("PKG_CONFIG_LIBDIR", self._conanfile.generators_folder)
+        if cross_building(self._conanfile):
+            env.define_path("PKG_CONFIG_LIBDIR", self._conanfile.generators_folder)
         return env
 
 

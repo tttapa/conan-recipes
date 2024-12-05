@@ -8,6 +8,15 @@ from conan.tools.gnu import (
     AutotoolsDeps,
 )
 from conan.tools.files import get
+from conan.tools.build import cross_building
+
+
+class CustomAutotoolsToolchain(AutotoolsToolchain):
+    def environment(self):
+        env = super().environment()
+        if cross_building(self._conanfile):
+            env.define_path("PKG_CONFIG_LIBDIR", self._conanfile.generators_folder)
+        return env
 
 
 class CPythonRecipe(ConanFile):
@@ -41,7 +50,7 @@ class CPythonRecipe(ConanFile):
         pc.generate()
         tc = AutotoolsDeps(self)
         tc.generate()
-        tc = AutotoolsToolchain(self)
+        tc = CustomAutotoolsToolchain(self)
         tc.configure_args.append("--enable-ipv6")
         tc.configure_args.append("--disable-test-modules")
         tc.configure_args.append("--with-ensurepip=no")
