@@ -118,10 +118,11 @@ class CPythonRecipe(ConanFile):
             f"{pfx}_USE_STATIC_LIBS": "FALSE" if self.options.shared else "TRUE",
             f"{pfx}_FIND_STRATEGY": "LOCATION",
             f"{pfx}_FIND_IMPLEMENTATIONS": "CPython",
-            f"{pfx}_INCLUDE_DIR": inc,
             f"{pfx}_EXECUTABLE": bin or f"{pfx}_EXECUTABLE-NOTFOUND",
-            f"{pfx}_LIBRARY": lib or f"{pfx}_LIBRARY-NOTFOUND",
-            f"{pfx}_SABI_LIBRARY": slib or f"{pfx}_SABI_LIBRARY-NOTFOUND",
+            # Setting FindPython artifacts breaks SOABI
+            f"PYTHON_DEV_INCLUDE_DIR": inc,
+            f"PYTHON_DEV_LIBRARY": lib or f"{pfx}_LIBRARY-NOTFOUND",
+            f"PYTHON_DEV_SABI_LIBRARY": slib or f"{pfx}_SABI_LIBRARY-NOTFOUND",
         }
         return "\n".join(f'set({k} "{v}")' for k, v in vars.items())
 
@@ -132,7 +133,8 @@ class CPythonRecipe(ConanFile):
         if self.options.with_bin:
             autotools.install(target="altbininstall")  # python3.x
         find_python = os.path.join(self.source_folder, "FindPython.cmake")
-        cmake_dir = os.path.join(self.package_folder, "cmake")
+        root = os.path.join(self.package_folder, "usr")
+        cmake_dir = os.path.join(root, "share", "cmake", "Modules")
         for pfx in "Python", "Python3":
             find_python_hints = self._get_find_python_vars(pfx)
             content = load(self, find_python)
@@ -140,5 +142,6 @@ class CPythonRecipe(ConanFile):
             save(self, os.path.join(cmake_dir, f"Find{pfx}.cmake"), content)
 
     def package_info(self):
-        cmake_dir = os.path.join(self.package_folder, "cmake")
+        root = os.path.join(self.package_folder, "usr")
+        cmake_dir = os.path.join(root, "share", "cmake", "Modules")
         self.cpp_info.builddirs = [cmake_dir]
