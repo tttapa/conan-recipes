@@ -35,7 +35,7 @@ class ToolchainsConan(ConanFile):
             self,
             **self.conan_data["sources"][self.version][os_name][target],
             destination=self.package_folder,
-            strip_root=True
+            strip_root=True,
         )
         os.system(f"chmod -R +w {self.package_folder}")
 
@@ -51,4 +51,21 @@ class ToolchainsConan(ConanFile):
             "armv6-rpi-linux-gnueabihf": "lib",
         }[target]
         libdir = os.path.join(self.package_folder, target, target, libname)
+        processor = {
+            "x86_64-bionic-linux-gnu": "x86_64",
+            "aarch64-rpi3-linux-gnu": "aarch64",
+            "armv8-rpi3-linux-gnueabihf": "armv7l",  # armv8l does not exist
+            "armv7-neon-linux-gnueabihf": "armv7l",
+            "armv6-rpi-linux-gnueabihf": "armv6l",
+        }[target]
         self.runenv_info.prepend_path("LD_LIBRARY_PATH", libdir)
+        self.conf_info.define("tools.cmake.cmaketoolchain:system_name", "Linux")
+        self.conf_info.define("tools.cmake.cmaketoolchain:system_processor", processor)
+        self.conf_info.define("tools.gnu:host_triplet", target)
+        compilers = {
+            "c": f"{target}-gcc",
+            "cpp": f"{target}-g++",
+            "fortran": f"{target}-gfortran",
+        }
+        self.conf_info.update("tools.build:compiler_executables", compilers)
+        self.conf_info.define("tools.build.cross_building:cross_build", True)
