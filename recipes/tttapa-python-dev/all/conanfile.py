@@ -69,17 +69,19 @@ class CPythonRecipe(ConanFile):
         pc.generate()
         tc = AutotoolsDeps(self)
         tc.generate()
-        tc = CustomAutotoolsToolchain(self)
+        tc = CustomAutotoolsToolchain(self, prefix="/usr")
 
         build_python_dep = self.dependencies.direct_build["tttapa-python-dev-build"]
         build_python_v = Version(build_python_dep.ref.version)
         python_majmin = f"python{build_python_v.major}.{build_python_v.minor}"
-        build_python_bin = os.path.join(build_python_dep.package_folder, "bin")
+        build_python_root = os.path.join(build_python_dep.package_folder, "usr")
+        build_python_bin = os.path.join(build_python_root, "bin")
         build_python = os.path.join(build_python_bin, python_majmin)
         config_site = os.path.join(self.source_folder, "config.site")
         tc.configure_args.append("--with-build-python=" + build_python)
         tc.configure_args.append("--enable-ipv6")
         tc.configure_args.append("--with-ensurepip=no")
+        tc.configure_args.append("--with-openssl=no-i-do-not-want-openssl")
         tc.configure_args.append("CONFIG_SITE=" + config_site)
         tc.extra_ldflags.append("-Wl,-rpath,\\\\$\\$ORIGIN/../lib")
         if not self.options.with_bin:
@@ -97,21 +99,22 @@ class CPythonRecipe(ConanFile):
             autotools.make()
 
     def _get_find_python_vars(self, pfx):
+        root = os.path.join(self.package_folder, "usr")
         python_v = Version(self.ref.version)
         python_maj = f"python{python_v.major}"
         python_majmin = f"{python_maj}.{python_v.minor}"
-        inc = os.path.join(self.package_folder, "include", python_majmin)
+        inc = os.path.join(root, "include", python_majmin)
         bin = lib = slib = None
         if self.options.with_bin:
-            bin = os.path.join(self.package_folder, "bin", python_majmin)
+            bin = os.path.join(root, "bin", python_majmin)
             if self.options.shared:
-                lib = os.path.join(self.package_folder, "lib", f"lib{python_majmin}.so")
-                slib = os.path.join(self.package_folder, "lib", f"lib{python_maj}.so")
+                lib = os.path.join(root, "lib", f"lib{python_majmin}.so")
+                slib = os.path.join(root, "lib", f"lib{python_maj}.so")
             else:
-                lib = os.path.join(self.package_folder, "lib", f"lib{python_majmin}.a")
+                lib = os.path.join(root, "lib", f"lib{python_majmin}.a")
                 slib = None
         vars = {
-            f"{pfx}_ROOT_DIR": self.package_folder,
+            f"{pfx}_ROOT_DIR": root,
             f"{pfx}_USE_STATIC_LIBS": "FALSE" if self.options.shared else "TRUE",
             f"{pfx}_FIND_STRATEGY": "LOCATION",
             f"{pfx}_FIND_IMPLEMENTATIONS": "CPython",

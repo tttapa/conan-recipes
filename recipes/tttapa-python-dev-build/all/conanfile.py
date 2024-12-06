@@ -7,7 +7,7 @@ from conan.tools.gnu import (
     PkgConfigDeps,
     AutotoolsDeps,
 )
-from conan.tools.files import get
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get
 from conan.tools.build import cross_building
 
 
@@ -34,6 +34,9 @@ class CPythonRecipe(ConanFile):
         "fPIC": True,
     }
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def source(self):
         get(
             self,
@@ -41,6 +44,7 @@ class CPythonRecipe(ConanFile):
             destination=self.source_folder,
             strip_root=True
         )
+        apply_conandata_patches(self)
 
     def requirements(self):
         self.requires("zlib/1.3.1")
@@ -50,7 +54,8 @@ class CPythonRecipe(ConanFile):
         pc.generate()
         tc = AutotoolsDeps(self)
         tc.generate()
-        tc = CustomAutotoolsToolchain(self)
+        # Python 3.8, 3.9 don't support prefix="/"
+        tc = CustomAutotoolsToolchain(self, prefix="/usr")
         tc.configure_args.append("--enable-ipv6")
         tc.configure_args.append("--disable-test-modules")
         tc.configure_args.append("--with-ensurepip=no")
@@ -71,7 +76,7 @@ class CPythonRecipe(ConanFile):
         autotools.install(target="altinstall")
 
     def package_info(self):
-        bindir = os.path.join(self.package_folder, "bin")
+        bindir = os.path.join(self.package_folder, "usr", "bin")
         self.buildenv_info.prepend_path("PATH", bindir)
-        libdir = os.path.join(self.package_folder, "lib")
+        libdir = os.path.join(self.package_folder, "usr", "lib")
         self.runenv_info.prepend_path("LD_LIBRARY_PATH", libdir)
