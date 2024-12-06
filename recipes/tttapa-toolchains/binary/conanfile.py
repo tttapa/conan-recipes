@@ -102,7 +102,6 @@ class ToolchainsConan(ConanFile):
             "c": f"{target}-gcc",
             "cpp": f"{target}-g++",
             "fortran": f"{target}-gfortran",
-            "asm": f"{target}-as",
         }
         self.conf_info.update("tools.build:compiler_executables", compilers)
         self.conf_info.define("tools.build.cross_building:cross_build", True)
