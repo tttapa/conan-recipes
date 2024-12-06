@@ -124,8 +124,8 @@ class CPythonRecipe(ConanFile):
             f"{pfx}_USE_STATIC_LIBS": static or "",
             f"{pfx}_FIND_STRATEGY": "LOCATION",
             f"{pfx}_FIND_IMPLEMENTATIONS": "CPython",
-            f"{pfx}_EXECUTABLE": bin or f"{pfx}_EXECUTABLE-NOTFOUND",
             # Setting FindPython artifacts breaks SOABI
+            f"PYTHON_DEV_EXECUTABLE": bin or f"{pfx}_EXECUTABLE-NOTFOUND",
             f"PYTHON_DEV_INCLUDE_DIR": inc,
             f"PYTHON_DEV_LIBRARY": lib or f"{pfx}_LIBRARY-NOTFOUND",
             f"PYTHON_DEV_SABI_LIBRARY": slib or f"{pfx}_SABI_LIBRARY-NOTFOUND",
