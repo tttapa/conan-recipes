@@ -24,7 +24,8 @@ class PythonTestConan(ConanFile):
         vars = {
             "PYTHON_DEV_PACKAGE_FOLDER": python_dev.package_folder,
             "PYTHON_DEV_VERSION": f"{version.major}.{version.minor}.{version.patch}",
-            "PYTHON_DEV_LIB_EXT": "so" if python_dev.options.shared else "a",
             "PYTHON_DEV_WITH_BIN": "On" if python_dev.options.with_bin else "Off",
         }
+        if python_dev.options.with_bin:
+            vars["PYTHON_DEV_LIB_EXT"] = "so" if python_dev.options.shared else "a"
         cmake.configure(variables=vars)

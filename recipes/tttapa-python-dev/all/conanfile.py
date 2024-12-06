@@ -29,7 +29,6 @@ class CustomAutotoolsToolchain(AutotoolsToolchain):
 
 class CPythonRecipe(ConanFile):
     name = "tttapa-python-dev"
-    package_type = "library"
 
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
@@ -92,6 +91,12 @@ class CPythonRecipe(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.get_safe("shared"):
+            self.options.rm_safe("fPIC")
+        if not self.options.get_safe("with_bin"):
+            self.options.rm_safe("shared")
+
     def build(self):
         autotools = Autotools(self)
         autotools.configure()
@@ -104,18 +109,19 @@ class CPythonRecipe(ConanFile):
         python_maj = f"python{python_v.major}"
         python_majmin = f"{python_maj}.{python_v.minor}"
         inc = os.path.join(root, "include", python_majmin)
-        bin = lib = slib = None
+        static = bin = lib = slib = None
         if self.options.with_bin:
             bin = os.path.join(root, "bin", python_majmin)
             if self.options.shared:
+                static = "FALSE"
                 lib = os.path.join(root, "lib", f"lib{python_majmin}.so")
                 slib = os.path.join(root, "lib", f"lib{python_maj}.so")
             else:
+                static = "TRUE"
                 lib = os.path.join(root, "lib", f"lib{python_majmin}.a")
-                slib = None
         vars = {
             f"{pfx}_ROOT_DIR": root,
-            f"{pfx}_USE_STATIC_LIBS": "FALSE" if self.options.shared else "TRUE",
+            f"{pfx}_USE_STATIC_LIBS": static or "",
             f"{pfx}_FIND_STRATEGY": "LOCATION",
             f"{pfx}_FIND_IMPLEMENTATIONS": "CPython",
             f"{pfx}_EXECUTABLE": bin or f"{pfx}_EXECUTABLE-NOTFOUND",
