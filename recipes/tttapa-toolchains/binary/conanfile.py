@@ -1,4 +1,5 @@
 import os
+import shlex
 
 from conan import ConanFile
 from conan.tools.files import get
@@ -69,7 +70,7 @@ class ToolchainsConan(ConanFile):
             destination=self.package_folder,
             strip_root=True,
         )
-        os.system(f"chmod -R +w {self.package_folder}")
+        self.run(f"chmod -R +w {shlex.quote(self.package_folder)}")
 
     def package_id(self):
         self.info.settings_target = self.settings_target
