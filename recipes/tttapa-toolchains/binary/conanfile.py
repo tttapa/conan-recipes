@@ -49,7 +49,7 @@ class ToolchainsConan(ConanFile):
 
         invalid_arch = str(self.settings_target.arch) not in self._arch_triplets
         if self.settings_target.os != "Linux" or invalid_arch:
-            msg = f"This toolchain only supports building for Linux-{self._arch_triplets.join(',')}. "
+            msg = f"This toolchain only supports building for Linux-{','.join(self._arch_triplets)}. "
             msg += f"{self.settings_target.os}-{self.settings_target.arch} is not supported."
             raise ConanInvalidConfiguration(msg)
 

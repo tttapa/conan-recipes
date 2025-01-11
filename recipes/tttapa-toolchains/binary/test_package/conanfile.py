@@ -1,6 +1,5 @@
 from io import StringIO
 from conan import ConanFile
-import re
 
 
 class TestPackageConan(ConanFile):
@@ -12,9 +11,7 @@ class TestPackageConan(ConanFile):
         self.tool_requires(self.tested_reference_str)
 
     def test(self):
-        tokens = re.split("[@#]", self.tested_reference_str)
-        toolchains, required_version = tokens[0].split("/", 1)
-        variant = self.dependencies.direct_build[toolchains].options.target
-        self.run(f"{variant}-g++ --version", output := StringIO())
+        compiler = self.conf.get("tools.build:compiler_executables")["cpp"]
+        self.run(f"{compiler} --version", output := StringIO())
         print(out := output.getvalue(), end="")
-        assert required_version in out
+        assert "tttapa/docker-arm-cross-toolchain" in out
