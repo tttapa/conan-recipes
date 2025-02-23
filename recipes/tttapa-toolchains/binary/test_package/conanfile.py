@@ -14,4 +14,4 @@ class TestPackageConan(ConanFile):
         compiler = self.conf.get("tools.build:compiler_executables")["cpp"]
         self.run(f"{compiler} --version", output := StringIO())
         print(out := output.getvalue(), end="")
-        assert "tttapa/docker-arm-cross-toolchain" in out
+        assert "tttapa/toolchains" in out
