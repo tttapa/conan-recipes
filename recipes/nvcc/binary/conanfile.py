@@ -120,6 +120,7 @@ class NVCCConan(ConanFile):
         tgt_linkflags = "-Wl,-rpath-link," + tgt_libdir
         compilers = {"cuda": os.path.join(bin_dir, "nvcc")}
         cmake_vars = {
+            "CUDA_TOOLKIT_ROOT_DIR": pkg_dir,
             # Hint for CMake's FindCUDA.cmake
             "CUDA_TOOLKIT_TARGET_DIR": tgt_dir,
             # Undocumented hint for CMake's FindCUDA.cmake, necessary when cross-compiling
