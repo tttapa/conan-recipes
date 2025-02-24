@@ -1,0 +1,11 @@
+sources:
+  "2.6.0":
+    url: "https://github.com/pytorch/pytorch/releases/download/v2.6.0/pytorch-v2.6.0.tar.gz"
+    sha256: "3005690eb7b083c443a38c7657938af63902f524ad87a6c83f1aca38c77e3b57"
+patches:
+  "2.6.0":
+    - patch_file: "patches/0001-aten-sleef.patch"
+    - patch_file: "patches/0002-cmake-or-xnnpack.patch"
+    - patch_file: "patches/0003-aten-cpuinfo.patch"
+    - patch_file: "patches/0004-dep-c10.patch"
+    - patch_file: "patches/0005-nvtx3-cuda.patch.patch"

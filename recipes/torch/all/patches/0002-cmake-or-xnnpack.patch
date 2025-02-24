@@ -1,0 +1,415 @@
+diff --git a/cmake/Dependencies.cmake b/cmake/Dependencies.cmake
+index 1813f44..afb25f2 100644
+--- a/cmake/Dependencies.cmake
++++ b/cmake/Dependencies.cmake
+@@ -148,129 +148,11 @@ if(CAFFE2_CMAKE_BUILDING_WITH_MAIN_REPO)
+ endif()
+ 
+ # ---[ BLAS
+-
+-set(AT_MKLDNN_ACL_ENABLED 0)
+-set(AT_MKLDNN_ENABLED 0)
+-set(AT_MKL_ENABLED 0)
+-# setting default preferred BLAS options if not already present.
+-if(NOT INTERN_BUILD_MOBILE)
+-  set(BLAS "MKL" CACHE STRING "Selected BLAS library")
+-else()
+-  set(BLAS "Eigen" CACHE STRING "Selected BLAS library")
+-  set(AT_MKLDNN_ENABLED 0)
+-  set(AT_MKL_ENABLED 0)
+-endif()
+-set_property(CACHE BLAS PROPERTY STRINGS "ATLAS;BLIS;Eigen;FLAME;Generic;MKL;OpenBLAS;vecLib;APL")
+-message(STATUS "Trying to find preferred BLAS backend of choice: " ${BLAS})
+-
+-if(BLAS STREQUAL "Eigen")
+-  # Eigen is header-only and we do not have any dependent libraries
+-  set(CAFFE2_USE_EIGEN_FOR_BLAS ON)
+-elseif(BLAS STREQUAL "ATLAS")
+-  find_package(Atlas REQUIRED)
+-  include_directories(SYSTEM ${ATLAS_INCLUDE_DIRS})
+-  list(APPEND Caffe2_DEPENDENCY_LIBS ${ATLAS_LIBRARIES})
+-  list(APPEND Caffe2_DEPENDENCY_LIBS cblas)
+-  set(BLAS_INFO "atlas")
+-  set(BLAS_FOUND 1)
+-  set(BLAS_LIBRARIES ${ATLAS_LIBRARIES} cblas)
+-elseif(BLAS STREQUAL "OpenBLAS")
+-  find_package(OpenBLAS REQUIRED)
+-  include_directories(SYSTEM ${OpenBLAS_INCLUDE_DIR})
+-  list(APPEND Caffe2_DEPENDENCY_LIBS ${OpenBLAS_LIB})
+-  set(BLAS_INFO "open")
+-  set(BLAS_FOUND 1)
+-  set(BLAS_LIBRARIES ${OpenBLAS_LIB})
+-elseif(BLAS STREQUAL "BLIS")
+-  find_package(BLIS REQUIRED)
+-  include_directories(SYSTEM ${BLIS_INCLUDE_DIR})
+-  list(APPEND Caffe2_DEPENDENCY_LIBS ${BLIS_LIB})
+-elseif(BLAS STREQUAL "MKL")
+-  if(BLAS_SET_BY_USER)
+-    find_package(MKL REQUIRED)
+-  else()
+-    find_package(MKL QUIET)
+-  endif()
+-  include(${CMAKE_CURRENT_LIST_DIR}/public/mkl.cmake)
+-  if(MKL_FOUND)
+-    message(STATUS "MKL libraries: ${MKL_LIBRARIES}")
+-    message(STATUS "MKL include directory: ${MKL_INCLUDE_DIR}")
+-    message(STATUS "MKL OpenMP type: ${MKL_OPENMP_TYPE}")
+-    message(STATUS "MKL OpenMP library: ${MKL_OPENMP_LIBRARY}")
+-    include_directories(AFTER SYSTEM ${MKL_INCLUDE_DIR})
+-    list(APPEND Caffe2_PUBLIC_DEPENDENCY_LIBS caffe2::mkl)
+-    set(CAFFE2_USE_MKL ON)
+-    set(BLAS_INFO "mkl")
+-    set(BLAS_FOUND 1)
+-    set(BLAS_LIBRARIES ${MKL_LIBRARIES})
+-  else()
+-    message(WARNING "MKL could not be found. Defaulting to Eigen")
+-    set(CAFFE2_USE_EIGEN_FOR_BLAS ON)
+-    set(CAFFE2_USE_MKL OFF)
+-  endif()
+-elseif(BLAS STREQUAL "NVPL")
+-  find_package(NVPL_BLAS REQUIRED)
+-  list(APPEND Caffe2_DEPENDENCY_LIBS nvpl::blas_lp64_omp)
+-  set(BLAS_INFO "nvpl")
+-  set(BLAS_FOUND 1)
+-  set(BLAS_USE_CBLAS_DOT TRUE)
+-elseif(BLAS STREQUAL "vecLib")
+-  find_package(vecLib REQUIRED)
+-  include_directories(SYSTEM ${vecLib_INCLUDE_DIR})
+-  list(APPEND Caffe2_DEPENDENCY_LIBS ${vecLib_LINKER_LIBS})
+-  set(BLAS_INFO "veclib")
+-  set(BLAS_FOUND 1)
+-  set(BLAS_LIBRARIES ${vecLib_LINKER_LIBS})
+-elseif(BLAS STREQUAL "FlexiBLAS")
+-  find_package(FlexiBLAS REQUIRED)
+-  include_directories(SYSTEM ${FlexiBLAS_INCLUDE_DIR})
+-  list(APPEND Caffe2_DEPENDENCY_LIBS ${FlexiBLAS_LIB})
+-elseif(BLAS STREQUAL "APL")
+-  find_package(APL REQUIRED)
+-  include_directories(SYSTEM ${APL_INCLUDE_DIR})
+-  set(BLAS_INFO "apl")
+-  set(BLAS_FOUND 1)
+-  set(BLAS_LIBRARIES ${APL_LIBRARIES})
+-elseif(BLAS STREQUAL "Generic")
+-  # On Debian family, the CBLAS ABIs have been merged into libblas.so
+-  if(ENV{GENERIC_BLAS_LIBRARIES} STREQUAL "")
+-    set(GENERIC_BLAS "blas")
+-  else()
+-    set(GENERIC_BLAS $ENV{GENERIC_BLAS_LIBRARIES})
+-  endif()
+-  find_library(BLAS_LIBRARIES NAMES ${GENERIC_BLAS})
+-  message("-- Using BLAS: ${BLAS_LIBRARIES}")
+-  list(APPEND Caffe2_DEPENDENCY_LIBS ${BLAS_LIBRARIES})
+-  set(GENERIC_BLAS_FOUND TRUE)
+-  set(BLAS_INFO "generic")
+-  set(BLAS_FOUND 1)
+-else()
+-  message(FATAL_ERROR "Unrecognized BLAS option: " ${BLAS})
+-endif()
+-
+-if(NOT INTERN_BUILD_MOBILE)
+-  set(AT_MKL_SEQUENTIAL 0)
+-  set(USE_BLAS 1)
+-  if(NOT (ATLAS_FOUND OR BLIS_FOUND OR GENERIC_BLAS_FOUND OR MKL_FOUND OR OpenBLAS_FOUND OR VECLIB_FOUND OR FlexiBLAS_FOUND OR NVPL_BLAS_FOUND OR APL_FOUND))
+-    message(WARNING "Preferred BLAS (" ${BLAS} ") cannot be found, now searching for a general BLAS library")
+-    find_package(BLAS)
+-    if(NOT BLAS_FOUND)
+-      set(USE_BLAS 0)
+-    endif()
+-  endif()
+-
+-  if(MKL_FOUND)
+-    if("${MKL_THREADING}" STREQUAL "SEQ")
+-      set(AT_MKL_SEQUENTIAL 1)
+-    endif()
+-    set(AT_MKL_ENABLED 1)
+-  endif()
+-elseif(INTERN_USE_EIGEN_BLAS)
+-  # Eigen BLAS for Mobile
+-  set(USE_BLAS 1)
+-  include(${CMAKE_CURRENT_LIST_DIR}/External/EigenBLAS.cmake)
+-  list(APPEND Caffe2_DEPENDENCY_LIBS eigen_blas)
+-endif()
++find_package(OpenBLAS REQUIRED)
++list(APPEND Caffe2_DEPENDENCY_LIBS OpenBLAS::OpenBLAS)
++set(BLAS_INFO "open")
++set(BLAS_FOUND 1)
++set(BLAS_LIBRARIES OpenBLAS::OpenBLAS)
+ 
+ # --- [ PocketFFT
+ set(AT_POCKETFFT_ENABLED 0)
+@@ -376,75 +258,17 @@ set(CONFU_DEPENDENCIES_BINARY_DIR ${PROJECT_BINARY_DIR}/confu-deps
+ if(INTERN_BUILD_MOBILE OR NOT DISABLE_NNPACK_AND_FAMILY)
+   set(USE_PTHREADPOOL ON CACHE BOOL "" FORCE)
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_PTHREADPOOL")
+-
+-  if(NOT TARGET pthreadpool)
+-    if(USE_SYSTEM_PTHREADPOOL)
+-      add_library(pthreadpool SHARED IMPORTED)
+-      find_library(PTHREADPOOL_LIBRARY pthreadpool)
+-      set_property(TARGET pthreadpool PROPERTY IMPORTED_LOCATION "${PTHREADPOOL_LIBRARY}")
+-      if(NOT PTHREADPOOL_LIBRARY)
+-        message(FATAL_ERROR "Cannot find pthreadpool")
+-      endif()
+-      message("-- Found pthreadpool: ${PTHREADPOOL_LIBRARY}")
+-    else()
+-      if(NOT DEFINED PTHREADPOOL_SOURCE_DIR)
+-        set(CAFFE2_THIRD_PARTY_ROOT "${PROJECT_SOURCE_DIR}/third_party")
+-        set(PTHREADPOOL_SOURCE_DIR "${CAFFE2_THIRD_PARTY_ROOT}/pthreadpool" CACHE STRING "pthreadpool source directory")
+-      endif()
+-
+-      set(PTHREADPOOL_BUILD_TESTS OFF CACHE BOOL "")
+-      set(PTHREADPOOL_BUILD_BENCHMARKS OFF CACHE BOOL "")
+-      set(PTHREADPOOL_LIBRARY_TYPE "static" CACHE STRING "")
+-      set(PTHREADPOOL_ALLOW_DEPRECATED_API ON CACHE BOOL "")
+-      add_subdirectory(
+-        "${PTHREADPOOL_SOURCE_DIR}"
+-        "${CONFU_DEPENDENCIES_BINARY_DIR}/pthreadpool")
+-      set_property(TARGET pthreadpool PROPERTY POSITION_INDEPENDENT_CODE ON)
+-    endif()
+-
+-    list(APPEND Caffe2_DEPENDENCY_LIBS pthreadpool)
+-  endif()
++  find_package(pthreadpool REQUIRED)
++  list(APPEND Caffe2_DEPENDENCY_LIBS pthreadpool::pthreadpool)
+ else()
+-  set(USE_PTHREADPOOL OFF CACHE BOOL "" FORCE)
++    set(USE_PTHREADPOOL OFF CACHE BOOL "" FORCE)
+ endif()
+ 
+ if(NOT CMAKE_SYSTEM_PROCESSOR MATCHES "^(s390x|ppc64le)$")
+   # ---[ Caffe2 uses cpuinfo library in the thread pool
+   # ---[ But it doesn't support s390x/powerpc and thus not used on s390x/powerpc
+-  if(NOT TARGET cpuinfo AND USE_SYSTEM_CPUINFO)
+-    add_library(cpuinfo SHARED IMPORTED)
+-    find_library(CPUINFO_LIBRARY cpuinfo)
+-    if(NOT CPUINFO_LIBRARY)
+-      message(FATAL_ERROR "Cannot find cpuinfo")
+-    endif()
+-    message("Found cpuinfo: ${CPUINFO_LIBRARY}")
+-    set_target_properties(cpuinfo PROPERTIES IMPORTED_LOCATION "${CPUINFO_LIBRARY}")
+-  elseif(NOT TARGET cpuinfo)
+-    if(NOT DEFINED CPUINFO_SOURCE_DIR)
+-      set(CPUINFO_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/../third_party/cpuinfo" CACHE STRING "cpuinfo source directory")
+-    endif()
+-
+-    set(CPUINFO_BUILD_TOOLS OFF CACHE BOOL "")
+-    set(CPUINFO_BUILD_UNIT_TESTS OFF CACHE BOOL "")
+-    set(CPUINFO_BUILD_MOCK_TESTS OFF CACHE BOOL "")
+-    set(CPUINFO_BUILD_BENCHMARKS OFF CACHE BOOL "")
+-    set(CPUINFO_LIBRARY_TYPE "static" CACHE STRING "")
+-    set(CPUINFO_LOG_LEVEL "error" CACHE STRING "")
+-    if(MSVC)
+-      if(CAFFE2_USE_MSVC_STATIC_RUNTIME)
+-        set(CPUINFO_RUNTIME_TYPE "static" CACHE STRING "")
+-      else()
+-        set(CPUINFO_RUNTIME_TYPE "shared" CACHE STRING "")
+-      endif()
+-    endif()
+-    add_subdirectory(
+-      "${CPUINFO_SOURCE_DIR}"
+-      "${CONFU_DEPENDENCIES_BINARY_DIR}/cpuinfo")
+-    # We build static version of cpuinfo but link
+-    # them into a shared library for Caffe2, so they need PIC.
+-    set_property(TARGET cpuinfo PROPERTY POSITION_INDEPENDENT_CODE ON)
+-  endif()
+-  list(APPEND Caffe2_DEPENDENCY_LIBS cpuinfo)
++  find_package(cpuinfo REQUIRED)
++  list(APPEND Caffe2_DEPENDENCY_LIBS cpuinfo::cpuinfo)
+ endif()
+ 
+ 
+@@ -465,7 +289,6 @@ if(USE_PYTORCH_QNNPACK)
+       # We build static versions of QNNPACK and pthreadpool but link
+       # them into a shared library for Caffe2, so they need PIC.
+       set_property(TARGET pytorch_qnnpack PROPERTY POSITION_INDEPENDENT_CODE ON)
+-      set_property(TARGET cpuinfo PROPERTY POSITION_INDEPENDENT_CODE ON)
+       # QNNPACK depends on gemmlowp headers
+       target_include_directories(pytorch_qnnpack PRIVATE "${CAFFE2_THIRD_PARTY_ROOT}/gemmlowp")
+     endif()
+@@ -491,77 +314,8 @@ if(USE_NNPACK)
+ endif()
+ 
+ # ---[ XNNPACK
+-if(USE_XNNPACK AND NOT USE_SYSTEM_XNNPACK)
+-  if(NOT DEFINED XNNPACK_SOURCE_DIR)
+-    set(XNNPACK_SOURCE_DIR "${CAFFE2_THIRD_PARTY_ROOT}/XNNPACK" CACHE STRING "XNNPACK source directory")
+-  endif()
+-
+-  if(NOT DEFINED XNNPACK_INCLUDE_DIR)
+-    set(XNNPACK_INCLUDE_DIR "${XNNPACK_SOURCE_DIR}/include" CACHE STRING "XNNPACK include directory")
+-  endif()
+-
+-  if(NOT TARGET XNNPACK OR NOT TARGET microkernels-prod)
+-    set(XNNPACK_LIBRARY_TYPE "static" CACHE STRING "")
+-    set(XNNPACK_BUILD_BENCHMARKS OFF CACHE BOOL "")
+-    set(XNNPACK_BUILD_TESTS OFF CACHE BOOL "")
+-
+-    # Disable ARM BF16 and FP16 vector for now; unused and causes build failures because
+-    # these new ISA features may not be supported on older compilers
+-    set(XNNPACK_ENABLE_ARM_BF16 OFF CACHE BOOL "")
+-
+-    # Disable AVXVNNI for now, older clang versions seem not to support it
+-    # (clang 12 is where avx-vnni support is added)
+-    set(XNNPACK_ENABLE_AVXVNNI OFF CACHE BOOL "")
+-
+-    # Disable I8MM For CI since clang 9 does not support neon i8mm.
+-    set(XNNPACK_ENABLE_ARM_I8MM OFF CACHE BOOL "")
+-
+-    # Disable avxvnni int8
+-    set(XNNPACK_ENABLE_AVXVNNIINT8 OFF CACHE BOOL "")
+-
+-    # Older MSVC versions don't support AVX512FP. TODO Minimum version support?
+-    IF(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
+-      set(XNNPACK_ENABLE_AVX512FP16  OFF CACHE BOOL "")
+-    ENDIF()
+-
+-    # Conditionally disable AVX512AMX, as it requires Clang 11 or later. Note that
+-    # XNNPACK does conditionally compile this based on GCC version. Once it also does
+-    # so based on Clang version, this logic can be removed.
+-    IF(CMAKE_C_COMPILER_ID STREQUAL "Clang")
+-      IF(CMAKE_C_COMPILER_VERSION VERSION_LESS "11")
+-        set(XNNPACK_ENABLE_AVX512AMX OFF CACHE BOOL "")
+-      ENDIF()
+-    ENDIF()
+-
+-    # Setting this global PIC flag for all XNNPACK targets.
+-    # This is needed for Object libraries within XNNPACK which must
+-    # be PIC to successfully link this static libXNNPACK with pytorch
+-    set(__caffe2_CMAKE_POSITION_INDEPENDENT_CODE_FLAG ${CMAKE_POSITION_INDEPENDENT_CODE})
+-    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+-
+-    add_subdirectory(
+-      "${XNNPACK_SOURCE_DIR}"
+-      "${CONFU_DEPENDENCIES_BINARY_DIR}/XNNPACK")
+-
+-    # Revert to whatever it was before
+-    set(CMAKE_POSITION_INDEPENDENT_CODE ${__caffe2_CMAKE_POSITION_INDEPENDENT_CODE_FLAG})
+-  endif()
+-
+-  include_directories(SYSTEM ${XNNPACK_INCLUDE_DIR})
+-  list(APPEND Caffe2_DEPENDENCY_LIBS XNNPACK microkernels-prod)
+-elseif(NOT TARGET XNNPACK AND USE_SYSTEM_XNNPACK)
+-  add_library(XNNPACK SHARED IMPORTED)
+-  add_library(microkernels-prod SHARED IMPORTED)
+-  find_library(XNNPACK_LIBRARY XNNPACK)
+-  find_library(microkernels-prod_LIBRARY microkernels-prod)
+-  set_property(TARGET XNNPACK PROPERTY IMPORTED_LOCATION "${XNNPACK_LIBRARY}")
+-  set_property(TARGET microkernels-prod PROPERTY IMPORTED_LOCATION "${microkernels-prod_LIBRARY}")
+-  if(NOT XNNPACK_LIBRARY or NOT microkernels-prod_LIBRARY)
+-    message(FATAL_ERROR "Cannot find XNNPACK")
+-  endif()
+-  message("-- Found XNNPACK: ${XNNPACK_LIBRARY}")
+-  list(APPEND Caffe2_DEPENDENCY_LIBS XNNPACK microkernels-prod)
+-endif()
++find_package(xnnpack REQUIRED)
++list(APPEND Caffe2_DEPENDENCY_LIBS xnnpack::xnnpack)
+ 
+ # ---[ Vulkan deps
+ if(USE_VULKAN)
+@@ -765,11 +519,8 @@ endif()
+ # ---[ NUMA
+ if(USE_NUMA)
+   if(LINUX)
+-    find_package(Numa)
+-    if(NOT NUMA_FOUND)
+-      message(WARNING "Not compiling with NUMA. Suppress this warning with -DUSE_NUMA=OFF")
+-      caffe2_update_option(USE_NUMA OFF)
+-    endif()
++    find_package(libnuma REQUIRED)
++    list(APPEND Caffe2_DEPENDENCY_LIBS libnuma::libnuma)
+   else()
+     message(WARNING "NUMA is currently only supported under Linux.")
+     caffe2_update_option(USE_NUMA OFF)
+@@ -790,45 +541,14 @@ if(USE_ITT)
+ endif()
+ 
+ # ---[ Caffe2 depends on FP16 library for half-precision conversions
+-if(NOT TARGET fp16 AND NOT USE_SYSTEM_FP16)
+-  set(CAFFE2_THIRD_PARTY_ROOT "${PROJECT_SOURCE_DIR}/third_party")
+-  # PSIMD is required by FP16
+-  if(NOT DEFINED PSIMD_SOURCE_DIR)
+-    set(PSIMD_SOURCE_DIR "${CAFFE2_THIRD_PARTY_ROOT}/psimd" CACHE STRING "PSimd source directory")
+-  endif()
+-  if(NOT DEFINED FP16_SOURCE_DIR)
+-    set(FP16_SOURCE_DIR "${CAFFE2_THIRD_PARTY_ROOT}/FP16" CACHE STRING "FP16 source directory")
+-  endif()
+-
+-  set(FP16_BUILD_TESTS OFF CACHE BOOL "")
+-  set(FP16_BUILD_BENCHMARKS OFF CACHE BOOL "")
+-  add_subdirectory(
+-    "${FP16_SOURCE_DIR}"
+-    "${CONFU_DEPENDENCIES_BINARY_DIR}/FP16")
+-elseif(NOT TARGET fp16 AND USE_SYSTEM_FP16)
+-  add_library(fp16 STATIC "/usr/include/fp16.h")
+-  set_target_properties(fp16 PROPERTIES LINKER_LANGUAGE C)
+-endif()
+-list(APPEND Caffe2_DEPENDENCY_LIBS fp16)
++find_package(fp16 REQUIRED)
++list(APPEND Caffe2_DEPENDENCY_LIBS fp16::fp16)
+ 
+ # ---[ EIGEN
+ # Due to license considerations, we will only use the MPL2 parts of Eigen.
+ set(EIGEN_MPL2_ONLY 1)
+-if(USE_SYSTEM_EIGEN_INSTALL)
+-  find_package(Eigen3)
+-  if(EIGEN3_FOUND)
+-    message(STATUS "Found system Eigen at " ${EIGEN3_INCLUDE_DIR})
+-  else()
+-    message(STATUS "Did not find system Eigen. Using third party subdirectory.")
+-    set(EIGEN3_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/../third_party/eigen)
+-    caffe2_update_option(USE_SYSTEM_EIGEN_INSTALL OFF)
+-  endif()
+-else()
+-  message(STATUS "Using third party subdirectory Eigen.")
+-  set(EIGEN3_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/../third_party/eigen)
+-endif()
+-include_directories(SYSTEM ${EIGEN3_INCLUDE_DIR})
+-
++find_package(Eigen3 REQUIRED)
++list(APPEND Caffe2_DEPENDENCY_LIBS Eigen3::Eigen)
+ 
+ # ---[ Python Interpreter
+ # If not given a Python installation, then use the current active Python
+@@ -1277,40 +997,9 @@ if(CAFFE2_CMAKE_BUILDING_WITH_MAIN_REPO AND NOT INTERN_DISABLE_ONNX)
+     add_definitions(-DONNX_ML=1)
+   endif()
+   add_definitions(-DONNXIFI_ENABLE_EXT=1)
+-  if(NOT USE_SYSTEM_ONNX)
+-    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../third_party/onnx EXCLUDE_FROM_ALL)
+-    if(NOT MSVC)
+-      set_target_properties(onnx_proto PROPERTIES CXX_STANDARD 17)
+-    endif()
+-  endif()
+-
+   add_definitions(-DONNX_NAMESPACE=${ONNX_NAMESPACE})
+-  if(NOT USE_SYSTEM_ONNX)
+-    include_directories(${ONNX_INCLUDE_DIRS})
+-    # In mobile build we care about code size, and so we need drop
+-    # everything (e.g. checker) in onnx but the pb definition.
+-    if(ANDROID OR IOS)
+-      caffe2_interface_library(onnx_proto onnx_library)
+-    else()
+-      caffe2_interface_library(onnx onnx_library)
+-    endif()
+-    list(APPEND Caffe2_DEPENDENCY_WHOLE_LINK_LIBS onnx_library)
+-  else()
+-    add_library(onnx SHARED IMPORTED)
+-    find_library(ONNX_LIBRARY onnx)
+-    if(NOT ONNX_LIBRARY)
+-      message(FATAL_ERROR "Cannot find onnx")
+-    endif()
+-    set_property(TARGET onnx PROPERTY IMPORTED_LOCATION ${ONNX_LIBRARY})
+-    add_library(onnx_proto SHARED IMPORTED)
+-    find_library(ONNX_PROTO_LIBRARY onnx_proto)
+-    if(NOT ONNX_PROTO_LIBRARY)
+-      message(FATAL_ERROR "Cannot find onnx")
+-    endif()
+-    set_property(TARGET onnx_proto PROPERTY IMPORTED_LOCATION ${ONNX_PROTO_LIBRARY})
+-    message("-- Found onnx: ${ONNX_LIBRARY} ${ONNX_PROTO_LIBRARY}")
+-    list(APPEND Caffe2_DEPENDENCY_LIBS onnx_proto onnx)
+-  endif()
++  find_package(ONNX REQUIRED)
++  list(APPEND Caffe2_DEPENDENCY_LIBS onnx_proto onnx)
+   # Recover the build shared libs option.
+   set(BUILD_SHARED_LIBS ${TEMP_BUILD_SHARED_LIBS})
+ endif()

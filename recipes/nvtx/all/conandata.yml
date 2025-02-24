@@ -1,0 +1,4 @@
+sources:
+  "tttapa.3.1.1":
+    url: "https://github.com/NVIDIA/NVTX/archive/v3.1.1.tar.gz"
+    sha256: "30c9fe2034d5da90c7b2051570dd8b9d59e05b8b9037a1c80bb088dce9c1f5d9"

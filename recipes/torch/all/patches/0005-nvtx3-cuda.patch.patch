@@ -1,0 +1,30 @@
+diff --git a/cmake/public/cuda.cmake b/cmake/public/cuda.cmake
+index 72e6d9d..4cc0e67 100644
+--- a/cmake/public/cuda.cmake
++++ b/cmake/public/cuda.cmake
+@@ -170,21 +170,10 @@ else()
+ endif()
+ 
+ # nvToolsExt
+-if(USE_SYSTEM_NVTX)
+-  find_path(nvtx3_dir NAMES nvtx3)
+-else()
+-  find_path(nvtx3_dir NAMES nvtx3 PATHS "${PROJECT_SOURCE_DIR}/third_party/NVTX/c/include" NO_DEFAULT_PATH)
+-endif()
+-find_package_handle_standard_args(nvtx3 DEFAULT_MSG nvtx3_dir)
+-if(nvtx3_FOUND)
+-  add_library(torch::nvtx3 INTERFACE IMPORTED)
+-  target_include_directories(torch::nvtx3 INTERFACE "${nvtx3_dir}")
+-  target_compile_definitions(torch::nvtx3 INTERFACE TORCH_CUDA_USE_NVTX3)
+-else()
+-  message(WARNING "Cannot find NVTX3, find old NVTX instead")
+-  add_library(torch::nvtoolsext INTERFACE IMPORTED)
+-  set_property(TARGET torch::nvtoolsext PROPERTY INTERFACE_LINK_LIBRARIES CUDA::nvToolsExt)
+-endif()
++find_package(nvtx REQUIRED)
++add_library(torch::nvtx3 INTERFACE IMPORTED)
++target_link_libraries(torch::nvtx3 INTERFACE nvtx::nvtx)
++target_compile_definitions(torch::nvtx3 INTERFACE TORCH_CUDA_USE_NVTX3)
+ 
+ 
+ # cublas
