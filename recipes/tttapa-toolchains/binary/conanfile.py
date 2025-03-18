@@ -46,7 +46,7 @@ class ToolchainsConan(ConanFile):
             "armv7": "neon",
             "armv6": "rpi",
         }
-        cpu = self.settings_target.arch.get_safe("toolchain-cpu", default=None)
+        cpu = self.settings_target.get_safe("arch.toolchain-cpu", default=None)
         cpu = cpu or default_cpu.get(str(self.settings_target.arch))
         if cpu is None:
             msg = "Unsupported toolchain CPU type. "
@@ -54,7 +54,7 @@ class ToolchainsConan(ConanFile):
             msg += "supported values (" + ", ".join(default_cpu) + "), or "
             msg += "set settings.arch.toolchain-cpu explicitly."
             raise ConanInvalidConfiguration(msg)
-        vendor = self.settings_target.os.get_safe("toolchain-vendor", default=None)
+        vendor = self.settings_target.get_safe("os.toolchain-vendor", default=None)
         vendor = vendor or default_vendor.get(cpu)
         if vendor is None:
             msg = "Unsupported toolchain vendor type. "
@@ -123,6 +123,9 @@ class ToolchainsConan(ConanFile):
     def package_id(self):
         self.info.settings_target = self.settings_target
         self.info.settings_target.rm_safe("build_type")
+        self.settings_target.rm_safe("compiler.libcxx")
+        self.settings_target.rm_safe("compiler.cppstd")
+        self.settings_target.rm_safe("compiler.cstd")
 
     def package_info(self):
         target = "-".join(self._get_target_triplet())
