@@ -4,6 +4,7 @@ from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get
+from conan.tools.scm import Version
 
 
 class guanaqoRecipe(ConanFile):
@@ -20,6 +21,8 @@ class guanaqoRecipe(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     bool_guanaqo_options = {
         "with_quad_precision": False,
+        "with_itt": False,
+        "with_tracing": False,
     }
     options = {
         "shared": [True, False],
@@ -33,6 +36,9 @@ class guanaqoRecipe(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
+        if Version(self.version).in_range("<1.0.0-alpha.8", resolve_prerelease=True):
+            self.options.rm_safe("with_itt")
+            self.options.rm_safe("with_tracing")
 
     def configure(self):
         if self.options.shared:
@@ -54,6 +60,8 @@ class guanaqoRecipe(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        if self.options.get_safe("with_itt"):
+            self.requires("ittapi/3.24.4", transitive_headers=True)
         self.test_requires("gtest/1.15.0")
         self.test_requires("eigen/tttapa.20240516")
 
@@ -62,7 +70,7 @@ class guanaqoRecipe(ConanFile):
         deps.generate()
         tc = CMakeToolchain(self)
         for k in self.bool_guanaqo_options:
-            value = getattr(self.options, k, None)
+            value = self.options.get_safe(k)
             if value is not None and value.value is not None:
                 tc.variables["GUANAQO_" + k.upper()] = bool(value)
         if can_run(self):
