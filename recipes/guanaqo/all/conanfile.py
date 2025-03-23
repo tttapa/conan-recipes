@@ -23,14 +23,19 @@ class guanaqoRecipe(ConanFile):
         "with_quad_precision": False,
         "with_itt": False,
         "with_tracing": False,
+        "with_openmp": False,
+        "with_blas": False,
+        "with_mkl": False,
     }
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "blas_index_type": ["int", "long", "long long"],
     } | {k: [True, False] for k in bool_guanaqo_options}
     default_options = {
         "shared": False,
         "fPIC": True,
+        "blas_index_type": "long long",
     } | bool_guanaqo_options
 
     def config_options(self):
@@ -39,10 +44,21 @@ class guanaqoRecipe(ConanFile):
         if Version(self.version).in_range("<1.0.0-alpha.8", resolve_prerelease=True):
             self.options.rm_safe("with_itt")
             self.options.rm_safe("with_tracing")
+        if Version(self.version).in_range("<1.0.0-alpha.9", resolve_prerelease=True):
+            self.options.rm_safe("with_openmp")
+            self.options.rm_safe("with_blas")
+            self.options.rm_safe("with_mkl")
+            self.options.rm_safe("blas_index_type")
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        if self.options.get_safe("with_blas"):
+            if not self.options.with_mkl:
+                # OpenBLAS does not allow configuring the index type
+                self.options.rm_safe("blas_index_type")
+        else:
+            self.options.rm_safe("with_mkl")
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -62,6 +78,8 @@ class guanaqoRecipe(ConanFile):
     def requirements(self):
         if self.options.get_safe("with_itt"):
             self.requires("ittapi/3.24.4", transitive_headers=True)
+        if self.options.get_safe("with_blas") and not self.options.get_safe("with_mkl"):
+            self.requires("openblas/0.3.27", transitive_headers=True)
         self.test_requires("gtest/1.15.0")
         self.test_requires("eigen/tttapa.20240516")
 
@@ -73,6 +91,11 @@ class guanaqoRecipe(ConanFile):
             value = self.options.get_safe(k)
             if value is not None and value.value is not None:
                 tc.variables["GUANAQO_" + k.upper()] = bool(value)
+        if self.options.get_safe("with_blas") and not self.options.get_safe("with_mkl"):
+            tc.variables["GUANAQO_WITH_OPENBLAS"] = True
+            tc.variables["GUANAQO_BLAS_INDEX_TYPE"] = self.options.get_safe(
+                "blas_index_type", default="int"
+            )
         if can_run(self):
             tc.variables["GUANAQO_FORCE_TEST_DISCOVERY"] = True
         tc.generate()
