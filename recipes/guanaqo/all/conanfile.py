@@ -45,10 +45,11 @@ class guanaqoRecipe(ConanFile):
             self.options.rm_safe("with_itt")
             self.options.rm_safe("with_tracing")
         if Version(self.version).in_range("<1.0.0-alpha.9", resolve_prerelease=True):
-            self.options.rm_safe("with_openmp")
             self.options.rm_safe("with_blas")
             self.options.rm_safe("with_mkl")
             self.options.rm_safe("blas_index_type")
+        if Version(self.version).in_range("<1.0.0-alpha.10", resolve_prerelease=True):
+            self.options.rm_safe("with_openmp")
 
     def configure(self):
         if self.options.shared:
