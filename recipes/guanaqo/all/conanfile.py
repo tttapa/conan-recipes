@@ -60,6 +60,7 @@ class guanaqoRecipe(ConanFile):
                 self.options.rm_safe("blas_index_type")
         else:
             self.options.rm_safe("with_mkl")
+            self.options.rm_safe("blas_index_type")
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -92,8 +93,8 @@ class guanaqoRecipe(ConanFile):
             value = self.options.get_safe(k)
             if value is not None and value.value is not None:
                 tc.variables["GUANAQO_" + k.upper()] = bool(value)
-        if self.options.get_safe("with_blas") and not self.options.get_safe("with_mkl"):
-            tc.variables["GUANAQO_WITH_OPENBLAS"] = True
+        if self.options.get_safe("with_blas"):
+            tc.variables["GUANAQO_WITH_OPENBLAS"] = not self.options.with_mkl
             tc.variables["GUANAQO_BLAS_INDEX_TYPE"] = self.options.get_safe(
                 "blas_index_type", default="int"
             )
