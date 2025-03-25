@@ -150,7 +150,6 @@ class ToolchainsConan(ConanFile):
             "armv7-neon-linux-gnueabihf": "armv7l",
             "armv6-rpi-linux-gnueabihf": "armv6l",
         }[target]
-        self.runenv_info.prepend_path("LD_LIBRARY_PATH", libdir)
         self.conf_info.define("tools.cmake.cmaketoolchain:system_name", "Linux")
         self.conf_info.define("tools.cmake.cmaketoolchain:system_processor", processor)
         self.conf_info.define("tools.gnu:host_triplet", target)
