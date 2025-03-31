@@ -7,7 +7,7 @@ jobs:
   build:
     strategy:
       matrix:
-        version: ['2.11.0', '2.12.2', '2.13.0', '2.14.0']
+        version: ['2.11.0', '2.12.2', '2.13.0', '2.14.0', '2.15.0']
       fail-fast: false
     runs-on: ubuntu-24.04
     steps:
