@@ -7,7 +7,7 @@ jobs:
   build:
     strategy:
       matrix:
-        version: ['2.11.0', '2.12.2', '2.13.0', '2.14.0', '2.15.0']
+        version: ['==2.15.0', '<3']
       fail-fast: false
     runs-on: ubuntu-24.04
     steps:
@@ -17,7 +17,7 @@ jobs:
       with:
         python-version: '3.13'
     - name: Install Conan
-      run: pip install -U pip conan==${{ matrix.version }}
+      run: pip install -U pip 'conan${{ matrix.version }}'
     - name: Set up Conan
       run: conan profile detect -f
 
