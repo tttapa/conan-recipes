@@ -23,6 +23,7 @@ class guanaqoRecipe(ConanFile):
         "with_quad_precision": False,
         "with_itt": False,
         "with_tracing": False,
+        "with_hl_blas_tracing": True,
         "with_openmp": False,
         "with_blas": False,
         "with_mkl": False,
@@ -50,17 +51,22 @@ class guanaqoRecipe(ConanFile):
             self.options.rm_safe("blas_index_type")
         if Version(self.version) < "1.0.0-alpha.10":
             self.options.rm_safe("with_openmp")
+        if Version(self.version) < "1.0.0-alpha.13":
+            self.options.rm_safe("with_hl_blas_tracing")
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if self.options.get_safe("with_blas"):
+        with_blas = self.options.get_safe("with_blas")
+        if with_blas:
             if not self.options.with_mkl:
                 # OpenBLAS does not allow configuring the index type
                 self.options.rm_safe("blas_index_type")
         else:
             self.options.rm_safe("with_mkl")
             self.options.rm_safe("blas_index_type")
+        if not self.options.get_safe("with_tracing") or not with_blas:
+            self.options.rm_safe("with_hl_blas_tracing")
 
     def export_sources(self):
         export_conandata_patches(self)
