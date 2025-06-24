@@ -121,11 +121,11 @@ class ToolchainsConan(ConanFile):
         self.run(f"chmod -R +w {shlex.quote(self.package_folder)}")
 
     def package_id(self):
-        self.info.settings_target = self.settings_target
+        self.info.settings_target = self.settings_target.copy()
         self.info.settings_target.rm_safe("build_type")
-        self.settings_target.rm_safe("compiler.libcxx")
-        self.settings_target.rm_safe("compiler.cppstd")
-        self.settings_target.rm_safe("compiler.cstd")
+        self.info.settings_target.rm_safe("compiler.libcxx")
+        self.info.settings_target.rm_safe("compiler.cppstd")
+        self.info.settings_target.rm_safe("compiler.cstd")
 
     def package_info(self):
         target = "-".join(self._get_target_triplet())
