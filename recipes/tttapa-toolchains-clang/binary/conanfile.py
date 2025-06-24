@@ -30,6 +30,7 @@ You can then configure the version using e.g. `compiler.libcxx.gcc_version=15.1`
 in your profile.
 """
 
+import glob
 import os
 import shlex
 
@@ -85,12 +86,14 @@ class ToolchainsConan(ConanFile):
         return triplet
 
     def _get_target_libstdcxx_version(self) -> str | None:
-        return self.settings_target.get_safe("compiler.libcxx.gcc_version", default=None)
+        return self.settings_target.get_safe(
+            "compiler.libcxx.gcc_version", default=None
+        )
 
     def _get_gcc_version(self, tgt_gcc_version) -> str:
         possible_versions = self.conan_data["sources"][self.version]
         if tgt_gcc_version is None:
-            return next(iter(possible_versions))
+            return max(possible_versions, key=Version)
         if tgt_gcc_version in possible_versions:
             return tgt_gcc_version
         for p in possible_versions:
@@ -102,6 +105,21 @@ class ToolchainsConan(ConanFile):
         msg = f"Invalid GCC version '{tgt_gcc_version}'. "
         msg += f"Only the following versions are supported for the compiler: {', '.join(possible_versions)}"
         raise ConanInvalidConfiguration(msg)
+
+    def _get_gcc_dir(self, toolchain_dir, triple, version, bitness):
+        lib_dirs = ["lib64", "lib"] if bitness == 64 else ["lib32", "lib"]
+        gcc_dirs = ["gcc", "gcc-cross"]
+        matches = []
+        for lib in lib_dirs:
+            for gcc in gcc_dirs:
+                pattern = os.path.join(toolchain_dir, lib, gcc, triple, f"{version}*")
+                found = glob.glob(pattern)
+                matches.extend(found)
+        return matches
+
+    def _get_tgt_lib_dir(self, toolchain_dir, triple, bitness):
+        lib_dirs = ["lib64", "lib"] if bitness == 64 else ["lib32", "lib"]
+        return [os.path.join(toolchain_dir, triple, lib) for lib in lib_dirs]
 
     def validate(self):
         if self.settings.arch != "x86_64" or self.settings.os != "Linux":
@@ -161,10 +179,46 @@ class ToolchainsConan(ConanFile):
             "armv7-neon-linux-gnueabihf": "armv7l",
             "armv6-rpi-linux-gnueabihf": "armv6l",
         }[target]
+        bitness = {
+            "x86_64-focal-linux-gnu": 64,
+            "x86_64-bionic-linux-gnu": 64,
+            "x86_64-centos7-linux-gnu": 64,
+            "aarch64-rpi3-linux-gnu": 64,
+            "armv8-rpi3-linux-gnueabihf": 32,
+            "armv7-neon-linux-gnueabihf": 32,
+            "armv6-rpi-linux-gnueabihf": 32,
+        }[target]
         self.conf_info.define("tools.cmake.cmaketoolchain:system_name", "Linux")
         self.conf_info.define("tools.cmake.cmaketoolchain:system_processor", processor)
         self.conf_info.define("tools.gnu:host_triplet", target)
-        toolchain_flags = ["--gcc-toolchain=" + toolchain_dir, "--gcc-triple=" + target]
+        link_flags = []
+        toolchain_flags = []
+        if Version(self.settings_target.compiler).major >= 16:
+            gcc_version = self._get_gcc_version(self._get_target_libstdcxx_version())
+            toolchain_install_dir = self._get_gcc_dir(
+                toolchain_dir, target, gcc_version, bitness
+            )[0]
+            toolchain_flags += ["--gcc-install-dir=" + toolchain_install_dir]
+            link_flags += ["-L" + toolchain_install_dir]
+        else:
+            toolchain_flags += [
+                "--gcc-toolchain=" + toolchain_dir,
+                "--gcc-triple=" + target,
+            ]
+        sysroot = os.path.join(toolchain_dir, target, "sysroot")
+        self.conf_info.define("tools.build:sysroot", sysroot)
         self.conf_info.append("tools.build:cflags", toolchain_flags)
         self.conf_info.append("tools.build:cxxflags", toolchain_flags)
+        self.conf_info.append("tools.build:exelinkflags", link_flags)
+        self.conf_info.append("tools.build:sharedlinkflags", link_flags)
+        cmake_vars = {
+            "OpenMP_CXX_FLAGS": "-fopenmp=libgomp",
+            "OpenMP_CXX_LIB_NAMES": "gomp",
+            "OpenMP_C_FLAGS": "-fopenmp=libgomp",
+            "OpenMP_C_LIB_NAMES": "gomp",
+            "OpenMP_Fortran_FLAGS": "-fopenmp=libgomp",
+            "OpenMP_Fortran_LIB_NAMES": "gomp",
+            "OpenMP_gomp_LIBRARY": os.path.join(sysroot, "lib", "libgomp.so"),
+        }
+        self.conf_info.update("tools.cmake.cmaketoolchain:extra_variables", cmake_vars)
         self.conf_info.define("tools.build.cross_building:cross_build", True)
