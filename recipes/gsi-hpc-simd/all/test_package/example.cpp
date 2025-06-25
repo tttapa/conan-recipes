@@ -11,14 +11,14 @@ double dot(std::span<const double> a, std::span<const double> b) {
     assert(a.size() == b.size());
     const size_t n = a.size();
     using simd_t = std::datapar::simd<double>;
-    constexpr std::size_t simd_width = simd_t::size();
-    std::cout << "SIMD width: " << simd_width << "\n";
+    constexpr std::size_t width = simd_t::size();
+    std::cout << "SIMD width: " << width << "\n";
 
     simd_t acc {};
     std::size_t i = 0;
-    for (; i + simd_width <= n; i += simd_width) {
-        simd_t va(a.subspan(i).first<simd_width>());
-        simd_t vb(b.subspan(i).first<simd_width>());
+    for (; i + width <= n; i += width) {
+        auto va = std::datapar::unchecked_load<simd_t>(a.subspan(i));
+        auto vb = std::datapar::unchecked_load<simd_t>(b.subspan(i));
         acc += va * vb;
     }
     double result = reduce(acc);
