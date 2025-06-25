@@ -12,10 +12,14 @@ class guanaqoTestConan(ConanFile):
     def build_requirements(self):
         self.tool_requires(self.tested_reference_str)
 
+    def requirements(self):
+        if self.settings.compiler == "clang":
+            self.requires(f"llvm-openmp/[~{self.settings.compiler.version}]")
+
     def build(self):
         cmake = CMake(self)
         cmake.configure()
-        cmake.build()
+        cmake.build(cli_args=["--verbose"])
 
     def layout(self):
         cmake_layout(self)

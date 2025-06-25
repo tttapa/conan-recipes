@@ -211,14 +211,4 @@ class ToolchainsConan(ConanFile):
         self.conf_info.append("tools.build:cxxflags", toolchain_flags)
         self.conf_info.append("tools.build:exelinkflags", link_flags)
         self.conf_info.append("tools.build:sharedlinkflags", link_flags)
-        cmake_vars = {
-            "OpenMP_CXX_FLAGS": "-fopenmp=libgomp",
-            "OpenMP_CXX_LIB_NAMES": "gomp",
-            "OpenMP_C_FLAGS": "-fopenmp=libgomp",
-            "OpenMP_C_LIB_NAMES": "gomp",
-            "OpenMP_Fortran_FLAGS": "-fopenmp=libgomp",
-            "OpenMP_Fortran_LIB_NAMES": "gomp",
-            "OpenMP_gomp_LIBRARY": os.path.join(sysroot, "lib", "libgomp.so"),
-        }
-        self.conf_info.update("tools.cmake.cmaketoolchain:extra_variables", cmake_vars)
         self.conf_info.define("tools.build.cross_building:cross_build", True)
