@@ -11,7 +11,7 @@ class LADELRecipe(ConanFile):
     package_type = "library"
 
     # Optional metadata
-    license = "LGPLv3"
+    license = "LGPL-3.0-or-later"
     author = "Pieter P <pieter.p.dev@outlook.com>"
     url = "https://github.com/kul-optec/LADEL"
     description = "Quasidefinite LDL factorization package with (symmetric) row/column adds and deletes"
@@ -22,10 +22,12 @@ class LADELRecipe(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_mex": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_mex": False,
     }
 
     def config_options(self):
@@ -52,12 +54,17 @@ class LADELRecipe(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.test_requires("gtest/1.15.0")
+        self.test_requires("gtest/1.17.0")
+
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.23 <4.2]")
 
     def generate(self):
         deps = CMakeDeps(self)
         deps.generate()
         tc = CMakeToolchain(self)
+        if self.options.get_safe("with_mex"):
+            tc.variables["LADEL_WITH_MEX"] = True
         if can_run(self):
             tc.variables["LADEL_FORCE_TEST_DISCOVERY"] = True
         tc.generate()

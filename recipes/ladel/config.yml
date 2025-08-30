@@ -1,3 +1,5 @@
 versions:
+  "0.0.2":
+    folder: all
   "tttapa.20241118":
     folder: all
