@@ -1,4 +1,7 @@
 sources:
+  "0.0.4":
+    url: "https://github.com/kul-optec/LADEL/archive/refs/tags/0.0.4.zip"
+    sha256: "100d4c474afe22acee4ca2e8a20535cf03cfec511e21b6beca3eb048968e8842"
   "0.0.3":
     url: "https://github.com/kul-optec/LADEL/archive/refs/tags/0.0.3.zip"
     sha256: "9d8194c0658b4d8078fa58391beb2979f8ef066556135d963ab1b1a31e2f3eb9"
