@@ -42,7 +42,7 @@ class IpoptRecipe(ConanFile):
         )
 
     def requirements(self):
-        self.requires("openblas/0.3.27")
+        self.requires("openblas/0.3.30")
         if self.options.with_mumps:
             self.requires("coinmumps/3.0.7")
 

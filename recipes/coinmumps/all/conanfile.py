@@ -53,7 +53,7 @@ class COINMUMPSRecipe(ConanFile):
         rename(self, "MUMPS/libseq/mpi.h", "MUMPS/libseq/mumps_mpi.h")
 
     def requirements(self):
-        self.requires("openblas/0.3.27")
+        self.requires("openblas/0.3.30")
 
     def generate(self):
         pc = PkgConfigDeps(self)
