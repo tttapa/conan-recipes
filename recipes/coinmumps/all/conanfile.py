@@ -1,3 +1,4 @@
+import contextlib
 import os
 
 from conan import ConanFile
@@ -26,10 +27,12 @@ class COINMUMPSRecipe(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "static_fortran_libs": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "static_fortran_libs": False,
     }
 
     def source(self):
@@ -86,6 +89,12 @@ class COINMUMPSRecipe(ConanFile):
         )
         # The pkg-config version of these variables contain nonsense,
         # overwrite them
+        if self.options.get_safe("static_fortran_libs"):
+            sys_libs = self.cpp_info.system_libs
+            with contextlib.suppress(ValueError):
+                sys_libs[sys_libs.index("gfortran")] = ":libgfortran.a"
+            with contextlib.suppress(ValueError):
+                sys_libs[sys_libs.index("quadmath")] = ":libquadmath.a"
         self.cpp_info.includedirs = ["include/coin-or/mumps"]
         self.cpp_info.libdirs = ["lib"]
         self.cpp_info.libs = ["coinmumps"]
