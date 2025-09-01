@@ -5,6 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import can_run
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get
+from conan.tools.scm import Version
 
 
 class QPALMRecipe(ConanFile):
@@ -12,7 +13,7 @@ class QPALMRecipe(ConanFile):
     package_type = "library"
 
     # Optional metadata
-    license = "LGPLv3"
+    license = "LGPL-3.0-or-later"
     author = "Pieter P <pieter.p.dev@outlook.com>"
     url = "https://github.com/kul-optec/QPALM"
     description = "Proximal Augmented Lagrangian method for Quadratic Programs"
@@ -26,6 +27,7 @@ class QPALMRecipe(ConanFile):
         "with_julia": False,
         "with_fortran": False,
         "with_examples": False,
+        "with_mex": False,
     }
     options = {
         "shared": [True, False],
@@ -65,12 +67,22 @@ class QPALMRecipe(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("ladel/tttapa.20241118", transitive_headers=True)
-        self.test_requires("gtest/1.15.0")
+        self.requires("ladel/0.0.4", transitive_headers=True)
+        self.test_requires("gtest/1.17.0")
         if self.options.with_cxx:
-            self.requires("eigen/tttapa.20240516", transitive_headers=True)
+            self.requires("eigen/3.4.0", transitive_headers=True)
         if self.options.with_python:
-            self.requires("pybind11/2.13.6")
+            self.requires("pybind11/3.0.1")
+
+    def build_requirements(self):
+        if Version(self.version) < "1.2.6":
+            self.tool_requires("cmake/[>=3.20 <5]")
+        else:
+            self.tool_requires("cmake/[>=4.1 <5]")
+
+    def configure(self):
+        if self.options.get_safe("with_mex"):
+            self.options["ladel/*"].with_mex = True
 
     def generate(self):
         deps = CMakeDeps(self)
@@ -80,7 +92,7 @@ class QPALMRecipe(ConanFile):
             value = getattr(self.options, k, None)
             if value is not None and value.value is not None:
                 tc.variables["QPALM_" + k.upper()] = bool(value)
-        if self.options.with_python:
+        if self.options.with_python and Version(self.version) < "1.2.6":
             tc.variables["USE_GLOBAL_PYBIND11"] = True
         if can_run(self):
             tc.variables["QPALM_FORCE_TEST_DISCOVERY"] = True
@@ -103,4 +115,6 @@ class QPALMRecipe(ConanFile):
         if self.options.with_cxx:
             self.cpp_info.builddirs.append(os.path.join("lib", "cmake", "QPALM_cxx"))
         if self.options.with_fortran:
-            self.cpp_info.builddirs.append(os.path.join("lib", "cmake", "QPALM_fortran"))
+            self.cpp_info.builddirs.append(
+                os.path.join("lib", "cmake", "QPALM_fortran")
+            )
