@@ -91,6 +91,9 @@ class guanaqoRecipe(ConanFile):
         self.test_requires("gtest/1.15.0")
         self.test_requires("eigen/tttapa.20240516")
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.24 <5]")
+
     def generate(self):
         deps = CMakeDeps(self)
         deps.generate()
