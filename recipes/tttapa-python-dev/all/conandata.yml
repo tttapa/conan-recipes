@@ -1,4 +1,7 @@
 sources:
+  "3.14.0-rc3":
+    url: "https://www.python.org/ftp/python/3.14.0/Python-3.14.0rc3.tgz"
+    sha256: "f52c3fa94a02adf9a6228abf53f6a53f09ce06aa168d879a332054c598179853"
   "3.14.0-rc2":
     url: "https://www.python.org/ftp/python/3.14.0/Python-3.14.0rc2.tgz"
     sha256: "b336f5d76fcf2725b29108f253d4338fbe4cc6a17cd8baf059deebb5a343dd8f"
@@ -36,6 +39,8 @@ sources:
     url: "https://www.python.org/ftp/python/3.8.20/Python-3.8.20.tgz"
     sha256: "9f2d5962c2583e67ef75924cd56d0c1af78bf45ec57035cf8a2cc09f74f4bf78"
 patches:
+  "3.14.0-rc3":
+    - patch_file: "patches/0001-limit-makefile-3.14.0-rc2.patch"
   "3.14.0-rc2":
     - patch_file: "patches/0001-limit-makefile-3.14.0-rc2.patch"
   "3.13.7":
