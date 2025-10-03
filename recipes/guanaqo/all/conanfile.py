@@ -89,7 +89,7 @@ class guanaqoRecipe(ConanFile):
         if self.options.get_safe("with_blas") and not self.options.get_safe("with_mkl"):
             self.requires("openblas/0.3.30", transitive_headers=True)
         self.test_requires("gtest/1.17.0")
-        self.test_requires("eigen/3.4.0")
+        self.test_requires("eigen/[~3.4 || ~5.0]")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.24 <5]")

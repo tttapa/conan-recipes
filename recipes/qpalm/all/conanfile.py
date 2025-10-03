@@ -70,7 +70,7 @@ class QPALMRecipe(ConanFile):
         self.requires("ladel/0.0.4", transitive_headers=True)
         self.test_requires("gtest/1.17.0")
         if self.options.with_cxx:
-            self.requires("eigen/3.4.0", transitive_headers=True)
+            self.requires("eigen/[~3.4 || ~5.0]", transitive_headers=True)
         if self.options.with_python:
             self.requires("pybind11/3.0.1")
 

@@ -79,7 +79,7 @@ class BatmatRecipe(ConanFile):
             self.requires("gsi-hpc-simd/tttapa.20250625", transitive_headers=True)
 
     def build_requirements(self):
-        self.test_requires("eigen/3.4.0")
+        self.test_requires("eigen/[~3.4 || ~5.0]")
         self.test_requires("gtest/1.17.0")
         self.tool_requires("cmake/[>=3.24 <5]")
 

@@ -22,7 +22,7 @@ class NanobindConan(ConanFile):
 
     def requirements(self):
         self.requires("tsl-robin-map/1.4.0", transitive_headers=True)
-        self.test_requires("eigen/3.4.0")
+        self.test_requires("eigen/[~3.4 || ~5.0]")
         self.tool_requires("cmake/[>=3.24 <5]")
 
     def generate(self):
