@@ -12,6 +12,9 @@ class PythonTestConan(ConanFile):
     def requirements(self):
         self.requires(self.tested_reference_str)
 
+    def build_requirements(self):
+        self.build_requires("cmake/[>=4.1.2 <5]")
+
     def layout(self):
         cmake_layout(self)
 
@@ -25,6 +28,7 @@ class PythonTestConan(ConanFile):
             "PYTHON_DEV_PACKAGE_FOLDER": python_dev.package_folder,
             "PYTHON_DEV_VERSION": f"{version.major}.{version.minor}.{version.patch}",
             "PYTHON_DEV_WITH_BIN": "On" if python_dev.options.with_bin else "Off",
+            "PYTHON_DEV_DISABLE_GIL": "On" if python_dev.options.disable_gil else "Off",
         }
         if python_dev.options.with_bin:
             vars["PYTHON_DEV_LIB_EXT"] = "so" if python_dev.options.shared else "a"

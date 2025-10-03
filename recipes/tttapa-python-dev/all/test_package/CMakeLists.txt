@@ -1,15 +1,21 @@
-cmake_minimum_required(VERSION 3.26)
+cmake_minimum_required(VERSION 4.1.2)
 project(PackageTest)
 
 set(PYTHON_DEV_PACKAGE_FOLDER "" CACHE PATH "")
 set(PYTHON_DEV_VERSION "" CACHE STRING "")
 set(PYTHON_DEV_LIB_EXT "" CACHE STRING "")
 option(PYTHON_DEV_WITH_BIN "option with_bin" Off)
+option(PYTHON_DEV_DISABLE_GIL "option disable_gil" Off)
+
+set(Py_ABI_FLAGS "")
+if (PYTHON_DEV_DISABLE_GIL)
+    set(Py_ABI_FLAGS "t")
+endif()
 
 if (PYTHON_DEV_WITH_BIN)
     find_package(Python REQUIRED COMPONENTS
                  Development.Module Development.SABIModule Development.Embed)
-    set(Py "python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}")
+    set(Py "python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}${Py_ABI_FLAGS}")
     if (NOT Python_VERSION VERSION_EQUAL PYTHON_DEV_VERSION)
         message(SEND_ERROR "Incorrect version: ${Python_VERSION}")
     endif()
@@ -28,7 +34,7 @@ if (PYTHON_DEV_WITH_BIN)
 else()
     find_package(Python REQUIRED COMPONENTS
                  Development.Module Development.SABIModule)
-    set(Py "python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}")
+    set(Py "python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}${Py_ABI_FLAGS}")
     if (NOT Python_VERSION VERSION_EQUAL PYTHON_DEV_VERSION)
         message(SEND_ERROR "Incorrect version: ${Python_VERSION}")
     endif()

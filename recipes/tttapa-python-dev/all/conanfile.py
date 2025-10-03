@@ -34,11 +34,13 @@ class CPythonRecipe(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "with_bin": [True, False],
+        "disable_gil": [True, False],
         "shared": [True, False],
         "fPIC": [True, False],
     }
     default_options = {
         "with_bin": False,
+        "disable_gil": False,
         "shared": True,
         "fPIC": True,
     }
@@ -85,6 +87,8 @@ class CPythonRecipe(ConanFile):
         tc.extra_ldflags.append("-Wl,-rpath,\\\\$\\$ORIGIN/../lib")
         if not self.options.with_bin:
             tc.configure_args.append("--with-static-libpython=no")
+        if self.options.disable_gil:
+            tc.configure_args.append("--disable-gil")
         tc.generate()
 
     def config_options(self):
@@ -96,6 +100,8 @@ class CPythonRecipe(ConanFile):
             self.options.rm_safe("fPIC")
         if not self.options.get_safe("with_bin"):
             self.options.rm_safe("shared")
+        if Version(self.version) < "3.13":
+            self.options.rm_safe("disable_gil")
 
     def build(self):
         autotools = Autotools(self)
@@ -106,30 +112,33 @@ class CPythonRecipe(ConanFile):
     def _get_find_python_vars(self, pfx):
         root = os.path.join(self.package_folder, "usr")
         python_v = Version(self.ref.version)
+        abi = "t" if self.options.disable_gil else ""
         python_maj = f"python{python_v.major}"
         python_majmin = f"{python_maj}.{python_v.minor}"
-        inc = os.path.join(root, "include", python_majmin)
+        inc = os.path.join(root, "include", python_majmin + abi)
         static = bin = lib = slib = None
         if self.options.with_bin:
-            bin = os.path.join(root, "bin", python_majmin)
+            bin = os.path.join(root, "bin", python_majmin + abi)
             if self.options.shared:
                 static = "FALSE"
-                lib = os.path.join(root, "lib", f"lib{python_majmin}.so")
-                slib = os.path.join(root, "lib", f"lib{python_maj}.so")
+                lib = os.path.join(root, "lib", f"lib{python_majmin + abi}.so")
+                slib = os.path.join(root, "lib", f"lib{python_maj + abi}.so")
             else:
                 static = "TRUE"
-                lib = os.path.join(root, "lib", f"lib{python_majmin}.a")
+                lib = os.path.join(root, "lib", f"lib{python_majmin + abi}.a")
         vars = {
             f"{pfx}_ROOT_DIR": root,
             f"{pfx}_USE_STATIC_LIBS": static or "",
             f"{pfx}_FIND_STRATEGY": "LOCATION",
             f"{pfx}_FIND_IMPLEMENTATIONS": "CPython",
             # Setting FindPython artifacts breaks SOABI
-            f"PYTHON_DEV_EXECUTABLE": bin or f"{pfx}_EXECUTABLE-NOTFOUND",
-            f"PYTHON_DEV_INCLUDE_DIR": inc,
-            f"PYTHON_DEV_LIBRARY": lib or f"{pfx}_LIBRARY-NOTFOUND",
-            f"PYTHON_DEV_SABI_LIBRARY": slib or f"{pfx}_SABI_LIBRARY-NOTFOUND",
+            # f"{pfx}_EXECUTABLE": bin or f"{pfx}_EXECUTABLE-NOTFOUND",
+            # f"{pfx}_INCLUDE_DIR": inc,
+            # f"{pfx}_LIBRARY": lib or f"{pfx}_LIBRARY-NOTFOUND",
+            # f"{pfx}_SABI_LIBRARY": slib or f"{pfx}_SABI_LIBRARY-NOTFOUND",
         }
+        if self.options.disable_gil:
+            vars[f"{pfx}_FIND_ABI"] = "OFF;OFF;OFF;ON"
         return "\n".join(f'set({k} "{v}")' for k, v in vars.items())
 
     def package(self):

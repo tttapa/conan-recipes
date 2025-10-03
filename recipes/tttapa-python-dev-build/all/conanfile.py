@@ -21,7 +21,6 @@ class CustomAutotoolsToolchain(AutotoolsToolchain):
 
 class CPythonRecipe(ConanFile):
     name = "tttapa-python-dev-build"
-    package_type = "application"
 
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
