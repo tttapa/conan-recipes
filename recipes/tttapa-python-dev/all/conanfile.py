@@ -87,7 +87,7 @@ class CPythonRecipe(ConanFile):
         tc.extra_ldflags.append("-Wl,-rpath,\\\\$\\$ORIGIN/../lib")
         if not self.options.with_bin:
             tc.configure_args.append("--with-static-libpython=no")
-        if self.options.disable_gil:
+        if self.options.get_safe("disable_gil"):
             tc.configure_args.append("--disable-gil")
         tc.generate()
 
@@ -112,7 +112,7 @@ class CPythonRecipe(ConanFile):
     def _get_find_python_vars(self, pfx):
         root = os.path.join(self.package_folder, "usr")
         python_v = Version(self.ref.version)
-        abi = "t" if self.options.disable_gil else ""
+        abi = "t" if self.options.get_safe("disable_gil") else ""
         python_maj = f"python{python_v.major}"
         python_majmin = f"{python_maj}.{python_v.minor}"
         inc = os.path.join(root, "include", python_majmin + abi)
@@ -137,7 +137,7 @@ class CPythonRecipe(ConanFile):
             # f"{pfx}_LIBRARY": lib or f"{pfx}_LIBRARY-NOTFOUND",
             # f"{pfx}_SABI_LIBRARY": slib or f"{pfx}_SABI_LIBRARY-NOTFOUND",
         }
-        if self.options.disable_gil:
+        if self.options.get_safe("disable_gil"):
             vars[f"{pfx}_FIND_ABI"] = "OFF;OFF;OFF;ON"
         return "\n".join(f'set({k} "{v}")' for k, v in vars.items())
 
