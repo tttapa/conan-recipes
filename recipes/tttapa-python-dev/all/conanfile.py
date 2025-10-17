@@ -32,9 +32,11 @@ class CPythonRecipe(ConanFile):
 
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
+    # https://github.com/conan-io/conan/issues/19108
+    package_id_non_embed_mode = "full_mode"
     options = {
         "with_bin": [True, False],
-        "disable_gil": [True, False],
+        "disable_gil": [True, False],  # affects ABI
         "shared": [True, False],
         "fPIC": [True, False],
     }

@@ -25,12 +25,14 @@ class BatmatRecipe(ConanFile):
 
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
+    # https://github.com/conan-io/conan/issues/19108
+    package_id_non_embed_mode = "full_mode"
     bool_batmat_options = {
-        "with_openmp": False,
+        "with_openmp": False,  # affects ABI
         "with_benchmarks": False,
-        "with_cpu_time": False,
-        "with_gsi_hpc_simd": False,
-        "with_single": False,
+        "with_cpu_time": False,  # affects ABI
+        "with_gsi_hpc_simd": False,  # affects ABI
+        "with_single": False,  # affects ABI
     }
     options = {
         "shared": [True, False],

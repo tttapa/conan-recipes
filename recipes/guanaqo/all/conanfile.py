@@ -19,19 +19,21 @@ class guanaqoRecipe(ConanFile):
 
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
+    # https://github.com/conan-io/conan/issues/19108
+    package_id_non_embed_mode = "full_mode"
     bool_guanaqo_options = {
-        "with_quad_precision": False,
-        "with_itt": False,
-        "with_tracing": False,
-        "with_hl_blas_tracing": True,
-        "with_openmp": False,
-        "with_blas": False,
-        "with_mkl": False,
+        "with_quad_precision": False,  # affects ABI
+        "with_itt": False,  # affects ABI
+        "with_tracing": False,  # affects ABI
+        "with_hl_blas_tracing": True,  # affects ABI
+        "with_openmp": False,  # affects ABI
+        "with_blas": False,  # affects ABI
+        "with_mkl": False,  # affects ABI
     }
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "blas_index_type": ["int", "long", "long long"],
+        "blas_index_type": ["int", "long", "long long"],  # affects ABI
     } | {k: [True, False] for k in bool_guanaqo_options}
     default_options = {
         "shared": False,

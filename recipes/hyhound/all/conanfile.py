@@ -19,14 +19,16 @@ class HyhoundRecipe(ConanFile):
 
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
+    # https://github.com/conan-io/conan/issues/19108
+    package_id_non_embed_mode = "full_mode"
     bool_hyhound_options = {
-        "with_ocp": False,
+        "with_ocp": False,  # affects ABI
         "with_benchmarks": False,
     }
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "real_type": ["double;float", "float;double", "double", "float"],
+        "real_type": ["double;float", "float;double", "double", "float"],  # affects ABI
     } | {k: [True, False] for k in bool_hyhound_options}
     default_options = {
         "shared": False,
@@ -57,7 +59,6 @@ class HyhoundRecipe(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
-
 
     def requirements(self):
         self.requires(

@@ -21,11 +21,13 @@ class QPALMRecipe(ConanFile):
 
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
+    # https://github.com/conan-io/conan/issues/19108
+    package_id_non_embed_mode = "full_mode"
     bool_qpalm_options = {
-        "with_cxx": True,
+        "with_cxx": True,  # affects ABI
         "with_python": False,
         "with_julia": False,
-        "with_fortran": False,
+        "with_fortran": False,  # affects ABI
         "with_examples": False,
         "with_mex": False,
     }
