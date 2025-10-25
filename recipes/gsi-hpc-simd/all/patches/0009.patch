@@ -1,0 +1,13 @@
+diff --git a/bits/simd_x86.h b/bits/simd_x86.h
+index f00ad4f..7b40606 100644
+--- a/bits/simd_x86.h
++++ b/bits/simd_x86.h
+@@ -2421,7 +2421,7 @@ namespace std::__detail
+           else if constexpr (__vec_builtin_sizeof<_TV, 4>)
+             return __builtin_ia32_sqrtps(__x);
+           else if constexpr (__vec_builtin_sizeof<_TV, 8>)
+-            return __builtin_ia32_sqrtps(__x);
++            return __builtin_ia32_sqrtpd(__x);
+           else
+             static_assert(false);
+         }

@@ -19,15 +19,15 @@ class SimdRecipe(ConanFile):
         export_conandata_patches(self)
 
     def source(self):
-        git = Git(self)
+        git = Git(self, folder="simd")
         git.clone(url="https://github.com/GSI-HPC/simd.git", target=".")
         git.checkout(self.conan_data["sources"][self.version]["commit"])
         apply_conandata_patches(self)
 
     def package(self):
         include = os.path.join(self.package_folder, "include")
-        copy(self, "simd", self.source_folder, include)
-        copy(self, "bits/*.h", self.source_folder, include)
+        copy(self, "simd", os.path.join(self.source_folder, "simd"), include)
+        copy(self, "bits/*.h", os.path.join(self.source_folder, "simd"), include)
 
     def package_info(self):
         self.cpp_info.bindirs = []
