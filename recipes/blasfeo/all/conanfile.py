@@ -57,7 +57,7 @@ class BlasfeoRecipe(ConanFile):
             self.options.rm_safe("fPIC")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.24 <4]")
+        self.tool_requires("cmake/[>=3.24 <5]")
 
     def export_sources(self):
         export_conandata_patches(self)
