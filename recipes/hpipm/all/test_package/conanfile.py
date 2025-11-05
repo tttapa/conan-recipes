@@ -13,8 +13,9 @@ class HpipmTestConan(ConanFile):
         self.requires(self.tested_reference_str)
 
     def build(self):
+        version = self.dependencies[self.tested_reference_str].ref.version
         cmake = CMake(self)
-        cmake.configure()
+        cmake.configure(variables={"HPIPM_VERSION": version})
         cmake.build()
 
     def layout(self):

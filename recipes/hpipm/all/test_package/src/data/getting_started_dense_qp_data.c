@@ -9,10 +9,12 @@ int ne = 1;
 int nb = 2;
 /* ng */
 int ng = 0;
+#ifndef HPIPM_NO_NSB
 /* nsb */
 int nsb = 0;
 /* nsg */
 int nsg = 0;
+#endif
 /* ns */
 int ns = 0;
 /***************

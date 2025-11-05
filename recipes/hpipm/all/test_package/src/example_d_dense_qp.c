@@ -43,6 +43,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <blasfeo_d_aux.h>
 #include <blasfeo_d_aux_ext_dep.h>
 
 #include <hpipm_d_dense_qp_ipm.h>
@@ -59,8 +60,10 @@ extern int nv;
 extern int ne;
 extern int nb;
 extern int ng;
+#ifndef HPIPM_NO_NSB
 extern int nsb;
 extern int nsg;
+#endif
 extern int ns;
 extern double *H;
 extern double *g;
@@ -124,13 +127,21 @@ int main()
 	struct d_dense_qp_dim dim;
 	d_dense_qp_dim_create(&dim, dim_mem);
 
+#ifdef HPIPM_NO_NSB
+	//d_dense_qp_dim_set_all(nv, ne, nb, ng, ns, &dim);
+#else
 	//d_dense_qp_dim_set_all(nv, ne, nb, ng, nsb, nsg, &dim);
+#endif
 	d_dense_qp_dim_set_nv(nv, &dim);
 	d_dense_qp_dim_set_ne(ne, &dim);
 	d_dense_qp_dim_set_nb(nb, &dim);
 	d_dense_qp_dim_set_ng(ng, &dim);
+#ifdef HPIPM_NO_NSB
+	d_dense_qp_dim_set_ns(ns, &dim);
+#else
 	d_dense_qp_dim_set_nsb(nsb, &dim);
 	d_dense_qp_dim_set_nsg(nsg, &dim);
+#endif
 
 //	d_dense_qp_dim_codegen("examples/c/data/test_d_dense_data.c", "w", &dim);
 
