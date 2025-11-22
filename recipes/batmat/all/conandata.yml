@@ -32,3 +32,6 @@ commits:
   "0.0.3": "adf9ff69479f7d79104ada2356c3a31364a16ba8"
   "0.0.2": "0404c18ee3aa33f593289e85550e43bd3165ee31"
   "0.0.1": "d7e0a60cf68d4c2de49bac9b1d0a4611a2dc9b86"
+patches:
+  "0.0.8":
+    - patch_file: "patches/0001-immintrin.patch"
