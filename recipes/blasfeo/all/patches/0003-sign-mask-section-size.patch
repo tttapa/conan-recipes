@@ -1,3 +1,29 @@
+diff --git a/kernel/avx/kernel_dgemm_4x4_lib4.S b/kernel/avx/kernel_dgemm_4x4_lib4.S
+index 1a16e223..2ddefd79 100644
+--- a/kernel/avx/kernel_dgemm_4x4_lib4.S
++++ b/kernel/avx/kernel_dgemm_4x4_lib4.S
+@@ -11883,8 +11883,6 @@ LC11:
+ 	.long	0x80000000
+ 	.long	0x0
+ 	.long	0x80000000
+-	.long	0x0
+-	.long	0x80000000
+ 
+ 
+ 
+diff --git a/kernel/avx/kernel_dgemm_8x4_lib4.S b/kernel/avx/kernel_dgemm_8x4_lib4.S
+index 7d03bece..5b6ee828 100644
+--- a/kernel/avx/kernel_dgemm_8x4_lib4.S
++++ b/kernel/avx/kernel_dgemm_8x4_lib4.S
+@@ -15640,8 +15640,6 @@ LC11:
+ 	.long	0x80000000
+ 	.long	0x0
+ 	.long	0x80000000
+-	.long	0x0
+-	.long	0x80000000
+ 
+ #if defined(OS_LINUX) | defined(OS_WINDOWS)
+ 	.align 32
 diff --git a/kernel/avx2/kernel_dgemm_12x4_lib4.S b/kernel/avx2/kernel_dgemm_12x4_lib4.S
 index 88d11c94..e3f43c65 100644
 --- a/kernel/avx2/kernel_dgemm_12x4_lib4.S
