@@ -198,16 +198,30 @@ class ToolchainsConan(ConanFile):
         self.run(f"chmod -R +w {shlex.quote(self.package_folder)}")
 
     def package_id(self):
+        # Only include settings that actually affect the package
+        # Use a whitelist approach to ignore any custom sub-settings
         self.info.settings_target = self.settings_target.copy()
-        self.info.settings_target.rm_safe("build_type")
-        self.info.settings_target.rm_safe("compiler.cppstd")
-        self.info.settings_target.rm_safe("compiler.cstd")
-        # For GCC, remove libcxx (not used)
-        if self.settings_target.compiler == "gcc":
-            self.info.settings_target.rm_safe("compiler.libcxx")
-        # For Clang, we don't care about its version
-        else:
-            self.info.settings_target.rm_safe("compiler.version")
+        for f in self.info.settings_target.fields:
+            if f not in ("os", "arch", "compiler"):
+                delattr(self.info.settings_target, f)
+        for f in self.info.settings_target.arch.fields:
+            if f != "toolchain-cpu":
+                delattr(self.info.settings_target.arch, f)
+        for f in self.info.settings_target.os.fields:
+            if f != "toolchain-vendor":
+                delattr(self.info.settings_target.os, f)
+        if self.info.settings_target.compiler == "gcc":
+            for f in self.info.settings_target.compiler.fields:
+                if f != "version":
+                    delattr(self.info.settings_target.compiler, f)
+        elif self.info.settings_target.compiler == "clang":
+            for f in self.info.settings_target.compiler.fields:
+                if f != "libcxx":
+                    delattr(self.info.settings_target.compiler, f)
+                else:
+                    for g in self.info.settings_target.compiler.libcxx.fields:
+                        if g != "gcc_version":
+                            delattr(self.info.settings_target.compiler.libcxx, g)
 
     def _get_target_processor(self, target: str) -> str:
         """Get CMake system processor for target."""
