@@ -217,25 +217,26 @@ class ToolchainsConan(ConanFile):
         # Only include settings that actually affect the package
         # Use a whitelist approach to ignore any custom sub-settings
         self.info.settings_target = self.settings_target.copy()
+        assert hasattr(self.info.settings_target, "fields")
         for f in self.info.settings_target.fields:
             if f not in ("os", "arch", "compiler"):
                 delattr(self.info.settings_target, f)
-        for f in self.info.settings_target.arch.fields:
+        for f in getattr(self.info.settings_target.arch, "fields", []):
             if f != "toolchain-cpu":
                 delattr(self.info.settings_target.arch, f)
-        for f in self.info.settings_target.os.fields:
+        for f in getattr(self.info.settings_target.os, "fields", []):
             if f != "toolchain-vendor":
                 delattr(self.info.settings_target.os, f)
         if self.info.settings_target.compiler == "gcc":
-            for f in self.info.settings_target.compiler.fields:
+            for f in getattr(self.info.settings_target.compiler, "fields", []):
                 if f != "version":
                     delattr(self.info.settings_target.compiler, f)
         elif self.info.settings_target.compiler in ("clang", "intel-cc"):
-            for f in self.info.settings_target.compiler.fields:
+            for f in getattr(self.info.settings_target.compiler, "fields", []):
                 if f != "libcxx":
                     delattr(self.info.settings_target.compiler, f)
                 else:
-                    for g in self.info.settings_target.compiler.libcxx.fields:
+                    for g in getattr(self.info.settings_target.compiler.libcxx, "fields", []):
                         if g != "gcc_version":
                             delattr(self.info.settings_target.compiler.libcxx, g)
 
