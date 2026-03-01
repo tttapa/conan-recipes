@@ -78,7 +78,7 @@ class guanaqoRecipe(ConanFile):
             self,
             **self.conan_data["sources"][self.version],
             destination=self.source_folder,
-            strip_root=True
+            strip_root=True,
         )
         apply_conandata_patches(self)
 
@@ -91,7 +91,9 @@ class guanaqoRecipe(ConanFile):
         if self.options.get_safe("with_blas") and not self.options.get_safe("with_mkl"):
             self.requires("openblas/0.3.30", transitive_headers=True)
         if self.options.get_safe("with_openmp") and self.settings.compiler == "clang":
-            self.requires(f"llvm-openmp/[~{self.settings.compiler.version}]")
+            self.requires(
+                f"llvm-openmp/[~{self.settings.compiler.version}]", transitive_headers=True
+            )
         self.test_requires("gtest/1.17.0")
         self.test_requires("eigen/[~3.4 || ~5.0]")
         if self.conf.get("user.guanaqo:with_python_tests", default=False, check_type=bool):
