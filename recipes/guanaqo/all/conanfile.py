@@ -12,6 +12,7 @@ class guanaqoRecipe(ConanFile):
     package_type = "library"
 
     # Optional metadata
+    license = "LGPL-3.0-or-later"
     author = "Pieter P <pieter.p.dev@outlook.com>"
     url = "https://github.com/tttapa/guanaqo"
     description = "Utilities for scientific software."
