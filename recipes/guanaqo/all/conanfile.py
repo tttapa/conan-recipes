@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, save
 from conan.tools.scm import Version
 
 
@@ -81,6 +81,8 @@ class guanaqoRecipe(ConanFile):
             self.options.rm_safe("with_pcm_tracing")
 
     def export_sources(self):
+        commit = self.conan_data["commits"][self.version]
+        save(self, os.path.join(self.export_sources_folder, "commit.txt"), commit)
         export_conandata_patches(self)
 
     def source(self):
@@ -93,7 +95,7 @@ class guanaqoRecipe(ConanFile):
         apply_conandata_patches(self)
 
     def layout(self):
-        cmake_layout(self, src_folder="src")
+        cmake_layout(self)
 
     def requirements(self):
         if self.options.get_safe("with_itt"):
@@ -114,9 +116,7 @@ class guanaqoRecipe(ConanFile):
         self.tool_requires("cmake/[>=3.24 <5]")
         self.test_requires("gtest/1.17.0")
         self.test_requires("eigen/[~3.4 || ~5.0]")
-        if self.conf.get(
-            "user.guanaqo:with_python_tests", default=False, check_type=bool
-        ):
+        if self.conf.get("user.guanaqo:with_python_tests", default=False, check_type=bool):
             self.test_requires("nanobind/2.10.2")
 
     def generate(self):
