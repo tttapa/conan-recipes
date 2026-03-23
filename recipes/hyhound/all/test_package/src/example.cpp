@@ -1,3 +1,4 @@
+#include <hyhound-version.h>
 #include <hyhound/householder-updowndate.hpp>
 
 #include <guanaqo/print.hpp>
@@ -6,6 +7,7 @@
 
 int main() {
     using namespace hyhound;
+    std::cout << "# hyhound " << HYHOUND_VERSION << " (" << hyhound_commit_hash << ")" << std::endl;
     index_t n = 3, m = 2;
     std::vector<real_t> L_sto(n * n), A_sto(n * m);
     MatrixView<real_t> L{{.data = L_sto.data(), .rows = n, .cols = n}};
