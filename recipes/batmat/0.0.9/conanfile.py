@@ -9,6 +9,7 @@ from conan.tools.files import (
     get,
     save,
 )
+from conan.tools.scm import Version
 
 
 class BatmatRecipe(ConanFile):
@@ -84,9 +85,9 @@ class BatmatRecipe(ConanFile):
         cmake_layout(self)
 
     def requirements(self):
-        if self.version >= "0.0.13":
+        if Version(self.version) >= "0.0.13":
             self.requires(
-                "guanaqo/[>=1.0.0-alpha.25 <1.0.0-alpha.27, include_prerelease]",
+                "guanaqo/[>=1.0.0-alpha.25 <1.0.0-alpha.28, include_prerelease]",
                 transitive_headers=True,
                 transitive_libs=True,
             )
