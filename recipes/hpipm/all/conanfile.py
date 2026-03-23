@@ -49,7 +49,9 @@ class HpipmRecipe(ConanFile):
 
     def requirements(self):
         self.requires("blasfeo/tttapa.20260119", transitive_headers=True)
-        self.build_requires("cmake/[>=3.24 <5]")
+
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.24 <5]")
 
     def generate(self):
         deps = CMakeDeps(self)
