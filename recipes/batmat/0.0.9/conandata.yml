@@ -1,4 +1,7 @@
 sources:
+  "0.0.22":
+    url: "https://github.com/tttapa/batmat/archive/refs/tags/0.0.22.zip"
+    sha256: "29db69690314bb3addfe7e0b6a5c876554b1e61a24ed1255b243cceee3af1886"
   "0.0.21":
     url: "https://github.com/tttapa/batmat/archive/refs/tags/0.0.21.zip"
     sha256: "7067a3964871508e02718038f05ec39ee0474dea3dce67d0684225d235a51cb8"
@@ -39,6 +42,7 @@ sources:
     url: "https://github.com/tttapa/batmat/archive/refs/tags/0.0.9.zip"
     sha256: "99408ed99c94ecfb63ed3ed58e940cd143c27fba89294616a2bcd91be13ca39c"
 commits:
+  "0.0.22": "63abc73671d4e89e376bde6b98279ecdd8be0c59"
   "0.0.21": "cc541b935c729ba61d7c4c136ed096a7f7066438"
   "0.0.20": "b28863a03e8f11d18272d67fa4885606f459933c"
   "0.0.19": "0e2d5020a3ca6a295678ce9269b39a3c814125c0"
